@@ -7,7 +7,7 @@ var boot = function () {
   server.listen(app.get('port'), function () {
     console.info('Express server listening on port ' + app.get('port'))
   })
-  mongoose.connect('mongodb://localhost:27017/demo_be', function (err, result) {
+  mongoose.connect('mongodb://<dbuser>:<dbpassword>@ds133281.mlab.com:33281/heroku_ncdhz4rn', function (err, result) {
     if (err) return console.log(err)
     console.log('Connect database successful')
   })
