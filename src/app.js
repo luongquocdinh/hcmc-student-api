@@ -10,7 +10,7 @@ var news = require('./../routes/news')
 let path = require('path')
 
 var conf = {
-  port: argv.p || 3000
+  port: process.env.PORT || 9090
 }
 
 app.set('port', conf.port)
