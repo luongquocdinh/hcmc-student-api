@@ -50,6 +50,23 @@ router.get('/:id', function (req, res) {
     })
 })
 
+// API get news
+router.get('/:id/:id_news', function (req, res) {
+    News.findOne({_id: req.params.id}, function (err, news) {
+        if (err) return console.log(err)
+        if (news) {
+            for (var i = 0; i < news.news.length; i++) {
+                if (news.news[i].id === req.params.id_news) {
+                    return res.json({
+                        data: news.news[i],
+                        error: null
+                    })
+                }
+            }
+        }
+    })
+})
+
 // API add topic
 router.post('/topic', function (req, res) {
     var data = News({
