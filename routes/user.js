@@ -23,6 +23,9 @@ var sess;
 
 let transporter = nodemailer.createTransport({
   service: 'gmail',
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: 'hcmc.students@gmail.com',
     pass: 'bku1234567890'
