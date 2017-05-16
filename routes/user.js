@@ -1,6 +1,7 @@
 var express = require('express')
 var path = require('path')
 var crypto = require('crypto')
+var session = require('express-session')
 var randomString = require('randomstring')
 var nodemailer = require('nodemailer')
 var formidable = require('formidable')
@@ -16,6 +17,9 @@ var responseError = require('./../helper/responseError')
 
 var User = require('./../models/user')
 var Login = require('./../models/login')
+var FeedBack = require('./../models/feedback')
+
+var sess;
 
 let transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -90,6 +94,7 @@ router.get('/active/:token', function (req, res) {
 
 // Login
 router.post('/login', function (req, res) {
+  sess = req.session;
   var email = req.body.email
   var password = crypto.createHash("sha256").update(req.body.password).digest('base64')
   let secretKey = randomString.generate()
@@ -108,6 +113,10 @@ router.post('/login', function (req, res) {
         if (err) {
           return console.log(err)
         }
+        sess.email = user.email
+        sess.name = user.name
+        sess.user_id = user._id
+        sess.point = user.point
         return res.json(responseSuccess("Login successful", data))
       })
     }
@@ -226,4 +235,26 @@ router.get('/profile', function (req, res) {
   })
 })
 
+// FeedBack
+router.post('/feedback', function (req, res) {
+  var title = req.body.title
+  var content = req.body.content
+  if (sess.email) {
+    var data = FeedBack({
+      title: title,
+      content: content,
+      user_mail: sess.email
+    })
+
+    data.save(function (err) {
+      if (err) {
+        return console.log(err)
+      }
+
+      return res.json(responseSuccess("Feedback", data));
+    })
+  } else {
+    return res.json(responseError("Please Login"));
+  }
+})
 module.exports = router
