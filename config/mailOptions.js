@@ -6,7 +6,7 @@ module.exports = function (email, token) {
         subject: 'Welcome to HCMC STUDENTS',
         text: 'Hello',
         html: `<b>Hello</b>
-            <a href="http://localhost:9090/user/active/`+ token +`">Confirm account</a>
+            <a href="https://hcmc-student-api.herokuapp.com//user/active/`+ token +`">Confirm account</a>
         `
     };
     return mailOptions

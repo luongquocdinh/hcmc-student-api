@@ -50,6 +50,7 @@ router.post('/', function (req, res) {
       avatar: imageDir.substring(imageDir.indexOf('/uploads/avatar/')),
       is_block: false,
       is_active: false,
+      point: 0,
       role: 'user',
       token: crypto.createHash("sha256").update(fields.email).digest('hex'),
       created_at: new Date(),
