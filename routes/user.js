@@ -27,8 +27,8 @@ let transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: 'hcmc.students@gmail.com',
-    pass: 'bku1234567890'
+    user: process.env.CRAWLER_MAIL || 'hcmc.students@gmail.com',
+    pass: process.env.CRAWLER_PWD || 'bku1234567890'
   }
 });
 
