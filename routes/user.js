@@ -3,14 +3,17 @@ var path = require('path')
 var crypto = require('crypto')
 var session = require('express-session')
 var randomString = require('randomstring')
-var nodemailer = require('nodemailer')
+// var nodemailer = require('nodemailer')
 var formidable = require('formidable')
 var fs = require('fs')
 
+let sendmail = require('./../configMail/MailSenderPromise.js')
+let createMailOpt = require('./../configMail/mailOptions.js')
+
 var router = express.Router()
 
-var mailOptions = require('./../config/mailOptions')
-var mailRecoverPassword = require('./../config/mailRecoverPassword')
+// var mailOptions = require('./../config/mailOptions')
+var mailRecoverPassword = require('./../configMail/mailRecoverPassword')
 
 var responseSuccess = require('./../helper/responseSuccess')
 var responseError = require('./../helper/responseError')
@@ -21,16 +24,14 @@ var FeedBack = require('./../models/feedback')
 
 var sess;
 
-let transporter = nodemailer.createTransport({
-  service: 'gmail',
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.CRAWLER_MAIL || 'hcmc.students@gmail.com',
-    pass: process.env.CRAWLER_PWD || 'bku1234567890'
-  }
-});
+// let transporter = nodemailer.createTransport({
+//   host: process.env.MAIL_DOMAIN,
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.MAIL_USERNAME || 'hcmc.students@gmail.com',
+//     pass: process.env.MAIL_PASSWORD || 'bku1234567890'
+//   }
+// });
 
 // Sign Up
 router.post('/', function (req, res) {
@@ -67,12 +68,13 @@ router.post('/', function (req, res) {
           if (err) {
             throw err
           } else {
-            transporter.sendMail(mailOptions(data.email, data.token), (error, info) => {
-              if (error) {
-                return console.log(error);
-              }
-              console.log('Message %s sent: %s', info.messageId, info.response);
-            });
+            // transporter.sendMail(mailOptions(data.email, data.token), (error, info) => {
+            //   if (error) {
+            //     return console.log(error);
+            //   }
+            //   console.log('Message %s sent: %s', info.messageId, info.response);
+            // });
+            sendmail(createMailOpt(data))
             return res.json(responseSuccess("Sign Up Successful", data))
           }
         })

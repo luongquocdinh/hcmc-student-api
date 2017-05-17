@@ -1,0 +1,5 @@
+{
+    "API_key" : "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",
+    "path" : "/v3/mail/send",
+    "method" : "POST"
+}
