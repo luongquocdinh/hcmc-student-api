@@ -45,8 +45,8 @@ router.get('/', function (req, res) {
 })
 
 // API get list news by topic
-router.get('/:id', function (req, res) {
-    News.findOne({_id: req.params.id}, function (err, news) {
+router.get('/:topic_ascii', function (req, res) {
+    News.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
         if (err) return console.log(err)
         news.news.sort(function (a, b) {
             return new Date(b.updated_at) - new Date(a.updated_at)
@@ -57,24 +57,24 @@ router.get('/:id', function (req, res) {
 })
 
 // API get news
-router.get('/:id/:id_news', function (req, res) {
+router.get('/:topic_ascii/:id', function (req, res) {
     var result
     var sess = req.session
-    News.findOne({_id: req.params.id}, function (err, news) {
+    News.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
         if (err) return console.log(err)
         if (news) {
             for (var i = 0; i < news.news.length; i++) {
-                if (news.news[i].id === req.params.id_news) {
+                if (news.news[i].id === req.params.id) {
                     result = news.news[i]
                     View.findOne({
                         $and: [
-                            {news_id: req.params.id_news, user_id: sess.user_id}
+                            {news_id: req.params.id, user_id: sess.user_id}
                         ]
                     })
                     .then(r => {
                         if (!r) {
                             var data_view = View({
-                                news_id: req.params.id_news,
+                                news_id: req.params.id,
                                 user_id: sess.user_id
                             })
 
@@ -104,8 +104,8 @@ router.get('/:id/:id_news', function (req, res) {
 })
 
 // API get comment
-router.get('/:id/:id_news/comment', function (req, res) {
-    Comment.find({news_id: req.params.id_news})
+router.get('/:topic_ascii/:id/comment', function (req, res) {
+    Comment.find({news_id: req.params.id})
         .sort({"created_at": -1})
         .then(r => {
             return res.json({
@@ -122,20 +122,20 @@ router.get('/:id/:id_news/comment', function (req, res) {
 })
 
 // API post comment
-router.post('/:id/:id_news/comment', function (req, res) {
+router.post('/:topic_ascii/:id/comment', function (req, res) {
     var sess = req.session
     var content = req.body.content
-    News.findOne({_id: req.params.id}, function (err, news) {
+    News.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
         if (err) return console.log(err)
         if (news) {
             for (var i = 0; i < news.news.length; i++) {
-                if (news.news[i].id === req.params.id_news) {
+                if (news.news[i].id === req.params.id) {
                     var comment = Comment({
                         content: content,
                         username: sess.name,
                         user_id: sess.user_id,
                         topic_id: req.params.id,
-                        news_id: req.params.id_news
+                        news_id: req.params.id
                     })
 
                     comment.save(function (err) {
