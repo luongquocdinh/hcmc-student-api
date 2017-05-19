@@ -60,47 +60,66 @@ router.get('/:topic_ascii', function (req, res) {
 router.get('/:topic_ascii/:id', function (req, res) {
     var result
     var sess = req.session
-    News.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-        if (err) return console.log(err)
-        if (news) {
-            for (var i = 0; i < news.news.length; i++) {
-                if (news.news[i].id === req.params.id) {
-                    result = news.news[i]
-                    View.findOne({
-                        $and: [
-                            {news_id: req.params.id, user_id: sess.user_id}
-                        ]
-                    })
-                    .then(r => {
-                        if (!r) {
-                            var data_view = View({
-                                news_id: req.params.id,
-                                user_id: sess.user_id
-                            })
+    if (typeof sess.email != 'undefined') {
+        News.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+            if (err) return console.log(err)
+            if (news) {
+                for (var i = 0; i < news.news.length; i++) {
+                    if (news.news[i].id === req.params.id) {
+                        result = news.news[i]
+                        View.findOne({
+                            $and: [
+                                {news_id: req.params.id, user_id: sess.user_id}
+                            ]
+                        })
+                        .then(r => {
+                            if (!r) {
+                                var data_view = View({
+                                    news_id: req.params.id,
+                                    user_id: sess.user_id
+                                })
 
-                            data_view.save(function (err, data) {
-                                if (err) {
-                                    return console.log(err)
-                                }
-                                User.findOne({_id: sess.user_id}, function (err, user) {
+                                data_view.save(function (err, data) {
                                     if (err) {
                                         return console.log(err)
                                     }
-                                    user.point++
-                                    user.save()
-                                    return res.end(result); 
+                                    User.findOne({_id: sess.user_id}, function (err, user) {
+                                        if (err) {
+                                            return console.log(err)
+                                        }
+                                        user.point++
+                                        user.save()
+                                        return res.end(result); 
+                                    })
                                 })
+                            }
+                            return res.json({
+                                data: result,
+                                error: null
                             })
-                        }
-                        return res.json({
-                            data: result,
-                            error: null
                         })
-                    })
+                    }
                 }
             }
-        }
-    })
+        })
+    } else {
+        News.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+            if (err) {
+                return console.log(err)
+            }
+            if (news) {
+                for (var i = 0; i < news.news.length; i++) {
+                    if (news.news[i].id === req.params.id) {
+                        return res.json({
+                            data: news.news[i],
+                            error: null
+                        })
+                    }
+                }
+            }
+        })
+    }
+
 })
 
 // API get comment

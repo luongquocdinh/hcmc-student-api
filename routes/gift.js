@@ -1,6 +1,7 @@
 var express = require('express')
 var path = require('path')
 var formidable = require('formidable')
+var session = require('express-session')
 var fs = require('fs')
 var util = require('util');
 
@@ -12,9 +13,14 @@ var responseError = require('./../helper/responseError')
 var User = require('./../models/user')
 var Login = require('./../models/login')
 var Gift = require('./../models/gift')
+var View = require('./../models/view')
+var Comment = require('./../models/comment')
+
+var sess;
 
 // API get list News
 router.get('/', function (req, res) {
+    sess = req.session
     Gift.find({})
         .sort({_id: -1})
         .then(data => {
@@ -39,8 +45,8 @@ router.get('/', function (req, res) {
 })
 
 // API get list news by topic
-router.get('/:id', function (req, res) {
-    Gift.findOne({_id: req.params.id}, function (err, news) {
+router.get('/:topic_ascii', function (req, res) {
+    Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
         if (err) return console.log(err)
         news.news.sort(function (a, b) {
             return new Date(b.updated_at) - new Date(a.updated_at)
@@ -50,113 +56,121 @@ router.get('/:id', function (req, res) {
     })
 })
 
-// API add topic
-// router.post('/topic', function (req, res) {
-//     var data = Activity({
-//         topic: req.body.topic,
-//         is_enable: true,
-//         news: []
-//     })
+// API get news
+router.get('/:topic_ascii/:id', function (req, res) {
+    var result
+    var sess = req.session
+    if (typeof sess.email != 'undefined') {
+        Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+            if (err) return console.log(err)
+            if (news) {
+                for (var i = 0; i < news.news.length; i++) {
+                    if (news.news[i].id === req.params.id) {
+                        result = news.news[i]
+                        View.findOne({
+                            $and: [
+                                {news_id: req.params.id, user_id: sess.user_id}
+                            ]
+                        })
+                        .then(r => {
+                            if (!r) {
+                                var data_view = View({
+                                    news_id: req.params.id,
+                                    user_id: sess.user_id
+                                })
 
-//     Activity.findOne({topic: req.body.topic}, function (err, topic) {
-//         if (err) throw err
-//         if (!topic) {
-//             data.save(function (err) {
-//                 if (err) throw err
-//                 return res.json(responseSuccess("Add topic successful", data))
-//             })
-//         } else {
-//             return res.json(responseError("Topic exist"))
-//         }
-//     })
-// })
+                                data_view.save(function (err, data) {
+                                    if (err) {
+                                        return console.log(err)
+                                    }
+                                    User.findOne({_id: sess.user_id}, function (err, user) {
+                                        if (err) {
+                                            return console.log(err)
+                                        }
+                                        user.point++
+                                        user.save()
+                                        return res.end(result); 
+                                    })
+                                })
+                            }
+                            return res.json({
+                                data: result,
+                                error: null
+                            })
+                        })
+                    }
+                }
+            }
+        })
+    } else {
+        Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+            if (err) {
+                return console.log(err)
+            }
+            if (news) {
+                console.log("here")
+                console.log(news)
+                for (var i = 0; i < news.news.length; i++) {
+                    if (news.news[i].id === req.params.id) {
+                        return res.json({
+                            data: news.news[i],
+                            error: null
+                        })
+                    }
+                }
+            }
+        })
+    }
 
-// API add news
-// router.post('/add', function (req, res) {
-//     var form = new formidable.IncomingForm()
+})
 
-//     form.multiples = true
-//     form.keepExtensions = true
-//     form.uploadDir = path.join(__dirname, './../uploads/news')
+// API get comment
+router.get('/:topic_ascii/:id/comment', function (req, res) {
+    Comment.find({news_id: req.params.id})
+        .sort({"created_at": -1})
+        .then(r => {
+            return res.json({
+                data: r,
+                error: null
+            })
+        })
+        .catch(err => {
+            return res.json({
+                data: null,
+                error: err
+            })
+        })
+})
 
-//     form.parse(req, function (err, fields, files) {
-//         if (err) {
-//             console.log('Error is: ' + err)
-//         }
-//         var imageDir = files.thumbnail.path
-//         var data = {
-//             "title": fields.title,
-//             "thumbnail": imageDir.substring(imageDir.indexOf('/uploads/news/')),
-//             "brief": fields.brief,
-//             "content": fields.content,
-//         }
-//         News.findOne({_id: req.headers._id}, function (err, news) {
-//             if (err) console.log(err)
-//             if (news) {
-//                 news.news.push(data)
-//                 news.save()
-//                 news.news.sort({updated_at: 1})
-//                 return res.json(responseSuccess("Add news successful", news))
-//             } else {
-//                 return res.json(responseError("Add news error"))
-//             }
-//         })
-//     })
-// })
+// API post comment
+router.post('/:topic_ascii/:id/comment', function (req, res) {
+    var sess = req.session
+    var content = req.body.content
+    Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+        if (err) return console.log(err)
+        if (news) {
+            for (var i = 0; i < news.news.length; i++) {
+                if (news.news[i].id === req.params.id) {
+                    var comment = Comment({
+                        content: content,
+                        username: sess.name,
+                        user_id: sess.user_id,
+                        topic_id: req.params.id,
+                        news_id: req.params.id
+                    })
 
-// API edit topic
-// router.put('/edit-topic/:id', function (req, res) {
-//     console.log(req.params.id)
-//     News.findOne({_id: req.params.id}, function (err, news) {
-//         if (err) return console.log(err)
-//         if (news) {
-//             news.topic = req.body.topic
-//             news.is_enable = req.body.is_enable
-//             news.updated_at = new Date()
-//             news.save()
-//             return res.json(responseSuccess("Update topic successful", news))
-//         } else {
-//             return res.json(responseError("Topic not exist"))
-//         }
-//     })
-// })
-
-// API edit news
-// router.put('/edit-news/:id/:id_news', function (req, res) {
-//     News.findOne({_id: req.params.id}, function (err, news) {
-//         if (err) return console.log(err)
-//         if (news) {
-//             for (var i = 0; i < news.news.length; i++) {
-//                 if (news.news[i].id === req.params.id_news) {
-//                     var form = new formidable.IncomingForm()
-//                     var index = i
-
-//                     form.multiples = true
-//                     form.keepExtensions = true
-//                     form.uploadDir = path.join(__dirname, './../uploads/news')
-
-//                     form.parse(req, function (err, fields, files) {
-//                         if (err) {
-//                             console.log("Err", err)
-//                         }
-//                         news.news[index].title = fields.title
-//                         news.news[index].brief = fields.brief
-//                         news.news[index].content = fields.content
-//                         news.news[index].updated_at = new Date()
-//                         imageDir = path.join(__dirname, './../' + news.news[index].thumbnail)
-//                         if (files.thumbnail) {
-//                             image = files.thumbnail.path
-//                             fs.unlinkSync(imageDir)
-//                             news.news[index].thumbnail = image.substring(image.indexOf('/uploads/news/'))
-//                         }
-
-//                         news.save()
-//                         return res.json(responseSuccess("Update News successful", news))
-//                     })
-//                 }
-//             }
-//         }
-//     })
-// })
-
+                    comment.save(function (err) {
+                        if (err) {
+                            return console.log(err)
+                        }
+                        return res.json({
+                            data: comment,
+                            error: null
+                        })
+                    })
+                }
+            }
+        }
+    })
+})
 module.exports = router
