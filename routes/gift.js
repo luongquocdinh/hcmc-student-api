@@ -89,14 +89,33 @@ router.get('/:topic_ascii/:id', function (req, res) {
                                         }
                                         user.point++
                                         user.save()
-                                        return res.end(result); 
+                                        View.count({news_id: req.params.id})
+                                            .then(views => {
+                                                return res.json({
+                                                    data: result,
+                                                    views: views,
+                                                    error: null
+                                                })
+                                            })
                                     })
                                 })
+                            } else {
+                                var data_view = View({
+                                    news_id: req.params.id,
+                                    user_id: sess.user_id
+                                })
+
+                                data_view.save(function (err, data) {
+                                     View.count({news_id: req.params.id})
+                                        .then(views => {
+                                            return res.json({
+                                                data: result,
+                                                views: views,
+                                                error: null
+                                            })
+                                        })
+                                })
                             }
-                            return res.json({
-                                data: result,
-                                error: null
-                            })
                         })
                     }
                 }
@@ -112,9 +131,22 @@ router.get('/:topic_ascii/:id', function (req, res) {
                 console.log(news)
                 for (var i = 0; i < news.news.length; i++) {
                     if (news.news[i].id === req.params.id) {
-                        return res.json({
-                            data: news.news[i],
-                            error: null
+                        result = news.news[i]
+                        var data_view = View({
+                            news_id: req.params.id,
+                            user_id: sess.user_id
+                        })
+
+                        data_view.save(function (err, data) {
+                                View.count({news_id: req.params.id})
+                                .then(views => {
+                                    console.log("2")
+                                    return res.json({
+                                        data: result,
+                                        views: views,
+                                        error: null
+                                    })
+                                })
                         })
                     }
                 }
