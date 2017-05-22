@@ -68,12 +68,6 @@ router.post('/', function (req, res) {
           if (err) {
             throw err
           } else {
-            // transporter.sendMail(mailOptions(data.email, data.token), (error, info) => {
-            //   if (error) {
-            //     return console.log(error);
-            //   }
-            //   console.log('Message %s sent: %s', info.messageId, info.response);
-            // });
             sendmail(createMailOpt(data))
             return res.json(responseSuccess("Sign Up Successful", data))
           }
