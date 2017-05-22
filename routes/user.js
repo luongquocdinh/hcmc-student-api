@@ -24,14 +24,12 @@ var FeedBack = require('./../models/feedback')
 
 var sess;
 
-// let transporter = nodemailer.createTransport({
-//   host: process.env.MAIL_DOMAIN,
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.MAIL_USERNAME || 'hcmc.students@gmail.com',
-//     pass: process.env.MAIL_PASSWORD || 'bku1234567890'
-//   }
-// });
+var cloudinary = require('cloudinary')
+cloudinary.config({ 
+  cloud_name: 'hwjtqthls', 
+  api_key: '174213315926813', 
+  api_secret: 'QgfzJyPCJBSjdkWqPTuBWeSc3D4' 
+});
 
 // Sign Up
 router.post('/', function (req, res) {
@@ -46,35 +44,40 @@ router.post('/', function (req, res) {
       console.log('Error is: ' + err)
     }
     var imageDir = files.avatar.path
-    var data = User({
-      name: fields.name,
-      email: fields.email,
-      password: crypto.createHash("sha256").update(fields.password).digest('base64'),
-      phone: fields.phone,
-      avatar: imageDir.substring(imageDir.indexOf('/uploads/avatar/')),
-      is_block: false,
-      is_active: false,
-      point: 0,
-      role: 'user',
-      token: crypto.createHash("sha256").update(fields.email).digest('hex'),
-      created_at: new Date(),
-      updated_at: new Date()
-    })
+    var images = ''
+    cloudinary.uploader.upload(imageDir, function(result) {
+        console.log(result.url)
+        images = result.url
+        var data = User({
+          name: fields.name,
+          email: fields.email,
+          password: crypto.createHash("sha256").update(fields.password).digest('base64'),
+          phone: fields.phone,
+          avatar: images,
+          is_block: false,
+          is_active: false,
+          point: 0,
+          role: 'user',
+          token: crypto.createHash("sha256").update(fields.email).digest('hex'),
+          created_at: new Date(),
+          updated_at: new Date()
+        })
 
-    User.findOne({ email: fields.email }, function (err, user) {
-      if (err) throw err
-      if (!user) {
-        data.save(function (err) {
-          if (err) {
-            throw err
+        User.findOne({ email: fields.email }, function (err, user) {
+          if (err) throw err
+          if (!user) {
+            data.save(function (err) {
+              if (err) {
+                throw err
+              } else {
+                sendmail(createMailOpt(data))
+                return res.json(responseSuccess("Sign Up Successful", data))
+              }
+            })
           } else {
-            sendmail(createMailOpt(data))
-            return res.json(responseSuccess("Sign Up Successful", data))
+            return res.json(responseError("Sign Up Error"))
           }
         })
-      } else {
-        return res.json(responseError("Sign Up Error"))
-      }
     })
   })
 })
