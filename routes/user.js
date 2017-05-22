@@ -120,7 +120,7 @@ router.post('/login', function (req, res) {
         sess.name = user.name
         sess.user_id = user._id
         sess.point = user.point
-        return res.json(responseSuccess("Login successful", data))
+        return res.json(responseSuccess("Login successful", user))
       })
     }
   })
