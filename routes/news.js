@@ -40,6 +40,7 @@ router.get('/', function (req, res) {
                 }
                 data.push(element)
             }
+            console.log(data[1])
             return res.json(responseSuccess("Tin tức", data))
         })
 })
@@ -51,8 +52,23 @@ router.get('/:topic_ascii', function (req, res) {
         news.news.sort(function (a, b) {
             return new Date(b.updated_at) - new Date(a.updated_at)
         })
-        var result = news.news.slice(0, 11)
-        return res.json(responseSuccess(news.topic, result))
+        var result = news.news.slice(0, 10)
+        var response = []
+        var index = 0
+        result.forEach(function (item) {
+            View.count({news_id: item._id}, function (err, view) {
+                response.push({
+                    data: item,
+                    views: view
+                })
+                index++
+                if (index == result.length) {
+                    return res.json(responseSuccess(news.topic, response))
+                }
+            })
+        })
+        // console.log(response)
+        // return res.json(responseSuccess(news.topic, result))
     })
 })
 
