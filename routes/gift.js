@@ -40,7 +40,31 @@ router.get('/', function (req, res) {
                 }
                 data.push(element)
             }
-            return res.json(responseSuccess("Quà tặng", data))
+            var response = []
+            var index = 0
+            for (var i = 0; i < data.length; i++) {
+                if (typeof data[i].news[0] !== 'undefined') {
+                    View.count({news_id: data[i].news[0]._id}, function (err, view) {
+                        if (view) {
+                            response.push({
+                                data: data[index],
+                                views: view
+                            })
+                        } else {
+                            response.push({
+                                data: data[index],
+                                views: view
+                            })
+                        }
+                        if (index + 1 == i) {
+                            return res.json(responseSuccess("Quà tặng", response))
+                        }
+                        index++
+                    })
+                } else {
+                    index++
+                }
+            }
         })
 })
 

@@ -17,6 +17,7 @@ var View = require('./../models/view')
 var Comment = require('./../models/comment')
 
 var sess;
+var per_page = 10;
 
 // API get list News
 router.get('/', function (req, res) {
@@ -40,8 +41,31 @@ router.get('/', function (req, res) {
                 }
                 data.push(element)
             }
-            console.log(data[1])
-            return res.json(responseSuccess("Tin tức", data))
+            var response = []
+            var index = 0
+            for (var i = 0; i < data.length; i++) {
+                if (typeof data[i].news[0] !== 'undefined') {
+                    View.count({news_id: data[i].news[0]._id}, function (err, view) {
+                        if (view) {
+                            response.push({
+                                data: data[index],
+                                views: view
+                            })
+                        } else {
+                            response.push({
+                                data: data[index],
+                                views: view
+                            })
+                        }
+                        if (index + 1 == i) {
+                            return res.json(responseSuccess("Tin Tức", response))
+                        }
+                        index++
+                    })
+                } else {
+                    index++
+                }
+            }
         })
 })
 
@@ -67,8 +91,6 @@ router.get('/:topic_ascii', function (req, res) {
                 }
             })
         })
-        // console.log(response)
-        // return res.json(responseSuccess(news.topic, result))
     })
 })
 
@@ -154,7 +176,6 @@ router.get('/:topic_ascii/:id', function (req, res) {
                         data_view.save(function (err, data) {
                                 View.count({news_id: req.params.id})
                                 .then(views => {
-                                    console.log("2")
                                     return res.json({
                                         data: result,
                                         views: views,
