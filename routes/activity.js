@@ -17,6 +17,7 @@ var View = require('./../models/view')
 var Comment = require('./../models/comment')
 
 var sess;
+var per_page = 10;
 
 // API get list News
 router.get('/', function (req, res) {
@@ -70,26 +71,31 @@ router.get('/', function (req, res) {
 
 // API get list news by topic
 router.get('/:topic_ascii', function (req, res) {
+    let page = req.query.page || 1
     Activity.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
         if (err) return console.log(err)
         news.news.sort(function (a, b) {
             return new Date(b.updated_at) - new Date(a.updated_at)
         })
-        var result = news.news.slice(0, 10)
+        var result = news.news.slice((page - 1)*per_page, per_page*page)
         var response = []
         var index = 0
-        result.forEach(function (item) {
-            View.count({news_id: item._id}, function (err, view) {
-                response.push({
-                    data: item,
-                    views: view
+        if (result.length > 0) {
+            result.forEach(function (item) {
+                View.count({news_id: item._id}, function (err, view) {
+                    response.push({
+                        data: item,
+                        views: view
+                    })
+                    index++
+                    if (index == result.length) {
+                        return res.json(responseSuccess(news.topic, response))
+                    }
                 })
-                index++
-                if (index == result.length) {
-                    return res.json(responseSuccess(news.topic, response))
-                }
             })
-        })
+        } else {
+            return res.json(responseSuccess(news.topic, result))
+        }
     })
 })
 
