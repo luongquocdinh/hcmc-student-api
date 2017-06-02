@@ -120,7 +120,14 @@ router.get('/:topic_ascii/:id', function (req, res) {
                             if (!r) {
                                 var data_view = View({
                                     news_id: req.params.id,
-                                    user_id: sess.user_id
+                                    user_id: sess.user_id,
+                                    type: "location",
+                                    topic_ascii: req.params.topic_ascii,
+                                    title: result.title,
+                                    brief: result.brief,
+                                    thumbnail: result.thumbnail,
+                                    content: result.content,
+                                    count: 1
                                 })
 
                                 data_view.save(function (err, data) {
@@ -176,13 +183,19 @@ router.get('/:topic_ascii/:id', function (req, res) {
                         result = news.news[i]
                         var data_view = View({
                             news_id: req.params.id,
-                            user_id: sess.user_id
+                            user_id: sess.user_id,
+                            type: "location",
+                            topic_ascii: req.params.topic_ascii,
+                            title: result.title,
+                            brief: result.brief,
+                            thumbnail: result.thumbnail,
+                            content: result.content,
+                            count: 1
                         })
 
                         data_view.save(function (err, data) {
                                 View.count({news_id: req.params.id})
                                 .then(views => {
-                                    console.log("2")
                                     return res.json({
                                         data: result,
                                         views: views,
