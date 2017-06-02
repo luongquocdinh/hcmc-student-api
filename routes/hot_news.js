@@ -28,13 +28,13 @@ router.get('/', function (req, res) {
      return new Promise(resolve => {
            return View.aggregate(
                 [
-                    {
-                        "$match": {
-                            updated_at: {
-                                "$gte": start,
-                            }
-                        }
-                    },
+                    // {
+                    //     "$match": {
+                    //         updated_at: {
+                    //             "$gte": start,
+                    //         }
+                    //     }
+                    // },
                     {
                         "$group": {
                             "_id": {
