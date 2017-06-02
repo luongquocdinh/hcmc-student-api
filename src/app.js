@@ -11,6 +11,8 @@ var news = require('./../routes/news')
 var activity = require('./../routes/activity')
 var gift = require('./../routes/gift')
 var event = require('./../routes/event')
+var hot = require('./../routes/hot_news')
+var images = require('./../routes/images')
 let path = require('path')
 
 app.use(session({
@@ -20,7 +22,7 @@ app.use(session({
 }));
 
 var conf = {
-  port: process.env.PORT || 9090
+  port: process.env.PORT || 9000
 }
 
 app.set('port', conf.port)
@@ -42,5 +44,7 @@ app.use('/news', news)
 app.use('/activity', activity)
 app.use('/gift', gift)
 app.use('/event', event)
+app.use('/hot', hot)
+app.use('/images', images)
 
 module.exports = app
