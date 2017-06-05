@@ -46,6 +46,7 @@ router.post('/', function (req, res) {
     var imageDir = files.avatar.path
     var images = ''
     cloudinary.uploader.upload(imageDir, function(result) {
+        console.log(result.url)
         images = result.url
         var data = User({
           name: fields.name,
@@ -107,10 +108,14 @@ router.post('/login', function (req, res) {
       var data = Login({
         "token": crypto.createHmac('sha256', secretKey).update(user.email).digest('hex'),
         "email": user.email,
+        "point": user.point,
+        "name": user.name,
+        "user_id": user._id,
         "is_active": true,
         "created_at": new Date(),
         "updated_at": new Date()
       })
+      console.log(data)
       data.save(function (err) {
         if (err) {
           return console.log(err)
@@ -119,7 +124,8 @@ router.post('/login', function (req, res) {
         sess.name = user.name
         sess.user_id = user._id
         sess.point = user.point
-        return res.json(responseSuccess("Login successful", user))
+        
+        return res.json(responseSuccess("Login successful", data))
       })
     }
   })
@@ -127,14 +133,17 @@ router.post('/login', function (req, res) {
 
 // Logout
 router.post('/logout', function (req, res) {
-  req.session.destroy( function (err) {
-		if(err) {
-			console.log(err);
-		}
-		else {
-			res.json(responseSuccess("Login success", "Dinh Hai Quan"));
-		}
-	})
+  var token = req.body.token
+  Login.findOne({ token: token, is_active: true }, function (err, user) {
+    if (!user) {
+      return res.json(responseError("Logout feild"))
+    } else {
+      user.is_active = false
+      user.updated_at = new Date()
+      user.save()
+      return res.json(responseSuccess("Logout successful", user))
+    }
+  })
 })
 
 // Change Password
@@ -192,65 +201,50 @@ router.post('/set-password/:token', function (req, res) {
 })
 
 // Update profile
-// router.post('/profile', function (req, res) {
-//   sess = req.session
-//   if (sess.email) {
-//     if (err) return console.log(err)
-//     User.findOne({ email: sess.email }, function (err, user) {
-//       if (err) return console.log(err)
-//       var form = new formidable.IncomingForm()
+router.post('/profile', function (req, res) {
+  Login.findOne({ token: req.headers.token }, function (err, login) {
+    if (err) return console.log(err)
+    User.findOne({ email: login.email }, function (err, user) {
+      if (err) return console.log(err)
+      var form = new formidable.IncomingForm()
 
-//       form.multiples = true
-//       form.keepExtensions = true
-//       form.uploadDir = path.join(__dirname, './../uploads/avatar')
+      form.multiples = true
+      form.keepExtensions = true
+      form.uploadDir = path.join(__dirname, './../uploads/avatar')
 
-//       form.parse(req, function (err, fields, files) {
-//         /////////////////////////////////////////
-//         if (err) {
-//           console.log('Error is: ' + err)
-//         }
-//         var imageDir = files.avatar.path
-//         var images = ''
-//         if ()
-//           cloudinary.uploader.upload(imageDir, function(result) {
-//               images = result.url
-//               user.name = fields.name
-//               user.email = fields.email
-//               user.phone = fields.phone
-              
-//           })
-//         /////////////////////////////////////////
-//         user.name = fields.name
-//         user.email = fields.email
-//         user.phone = fields.phone
-//         imageDir = path.join(__dirname, './../' + user.avatar)
+      form.parse(req, function (err, fields, files) {
+        user.name = fields.name
+        user.email = fields.email
+        user.phone = fields.phone
+        imageDir = path.join(__dirname, './../' + user.avatar)
 
-//         if (files.avatar) {
-//           image = files.avatar.path
-//           fs.unlinkSync(imageDir)
-//           user.avatar = image.substring(image.indexOf('/uploads/avatar/'))
-//         }
+        if (files.avatar) {
+          image = files.avatar.path
+          fs.unlinkSync(imageDir)
+          user.avatar = image.substring(image.indexOf('/uploads/avatar/'))
+        }
 
-//         user.updated_at = new Date()
-//         user.save()
-//         return res.json(responseSuccess("Update profile successful", user))
-//       })
-//     })
-//   }
-// })
+        user.updated_at = new Date()
+        user.save()
+        return res.json(responseSuccess("Update profile successful", user))
+      })
+    })
+  })
+})
 
 // Profile
 router.get('/profile', function (req, res) {
-  sess = req.session
-  console.log(sess)
-  if (sess.email) {
-    User.findOne({ email: sess.email }, function (err, user) {
-      if (err) return console.log(err)
-      return res.json(responseSuccess("Your Profile", user))
+  Login.findOne({ token: req.headers.token }, function (err, login) {
+    if (err) return res.json(responseError("Please Login"))
+    User.findOne({ email: login.email }, function (err, user) {
+      if (err) return res.json(responseError("Please Login"))
+      if (user) {
+        return res.json(responseSuccess("Your Profile", user))
+      } else {
+        return res.json(responseError("Please Login"))
+      }
     })
-  } else {
-    return res.json(responseError("Please Login!!!"))
-  }
+  })
 })
 
 // FeedBack

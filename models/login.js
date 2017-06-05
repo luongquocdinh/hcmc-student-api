@@ -5,6 +5,9 @@ var login = new Schema({
   "email": String,
   "token": String,
   "is_active": Boolean,
+  "name": String,
+  "point": Number,
+  "user_id": String,
   "created_at": { type: Date },
   "updated_at"    : { type: Date }
 })
