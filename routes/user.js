@@ -208,25 +208,34 @@ router.post('/profile', function (req, res) {
       if (err) return console.log(err)
       var form = new formidable.IncomingForm()
 
+      let avatar = ''
+      let dirImage = ''
+
       form.multiples = true
       form.keepExtensions = true
       form.uploadDir = path.join(__dirname, './../uploads/avatar')
 
       form.parse(req, function (err, fields, files) {
-        user.name = fields.name
-        user.email = fields.email
-        user.phone = fields.phone
-        imageDir = path.join(__dirname, './../' + user.avatar)
-
-        if (files.avatar) {
-          image = files.avatar.path
-          fs.unlinkSync(imageDir)
-          user.avatar = image.substring(image.indexOf('/uploads/avatar/'))
+        if (files.avatar.size != 0) {
+          avatar = files.avatar.path
+           cloudinary.uploader.upload(avatar, function(result) {
+              dirImage = result.url
+              user.name = fields.name
+              user.email = fields.email
+              user.phone = fields.phone
+              user.avatar = dirImage
+              user.updated_at = new Date()
+              user.save()
+          return res.json(responseSuccess("Update profile successful", user))
+           })
+        } else {
+          user.name = fields.name
+          user.email = fields.email
+          user.phone = fields.phone
+          user.updated_at = new Date()
+          user.save()
+          return res.json(responseSuccess("Update profile successful", user))
         }
-
-        user.updated_at = new Date()
-        user.save()
-        return res.json(responseSuccess("Update profile successful", user))
       })
     })
   })
