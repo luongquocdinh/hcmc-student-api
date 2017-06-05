@@ -104,43 +104,60 @@ router.get('/:topic_ascii', function (req, res) {
 // API get news
 router.get('/:topic_ascii/:id', function (req, res) {
     var result
-    var sess = req.session
-    if (typeof sess.email != 'undefined') {
-        Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-            if (err) return console.log(err)
-            if (news) {
-                for (var i = 0; i < news.news.length; i++) {
-                    if (news.news[i].id === req.params.id) {
-                        result = news.news[i]
-                        View.findOne({
-                            $and: [
-                                {news_id: req.params.id, user_id: sess.user_id}
-                            ]
-                        })
-                        .then(r => {
-                            if (!r) {
-                                var data_view = View({
-                                    news_id: req.params.id,
-                                    user_id: sess.user_id,
-                                    type: "gift",
-                                    topic_ascii: req.params.topic_ascii,
-                                    title: result.title,
-                                    brief: result.brief,
-                                    thumbnail: result.thumbnail,
-                                    content: result.content,
-                                    count: 1
-                                })
+    Login.findOne({ token: req.headers.token }, function (err, login) {
+        if (login) {
+            Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+                if (err) return console.log(err)
+                if (news) {
+                    for (var i = 0; i < news.news.length; i++) {
+                        if (news.news[i].id === req.params.id) {
+                            result = news.news[i]
+                            View.findOne({
+                                $and: [
+                                    {news_id: req.params.id, user_id: login.user_id}
+                                ]
+                            })
+                            .then(r => {
+                                if (!r) {
+                                    var data_view = View({
+                                        news_id: req.params.id,
+                                        user_id: login.user_id,
+                                        type: "gift",
+                                        topic_ascii: req.params.topic_ascii,
+                                        title: result.title,
+                                        brief: result.brief,
+                                        thumbnail: result.thumbnail,
+                                        content: result.content,
+                                        count: 1
+                                    })
 
-                                data_view.save(function (err, data) {
-                                    if (err) {
-                                        return console.log(err)
-                                    }
-                                    User.findOne({_id: sess.user_id}, function (err, user) {
+                                    data_view.save(function (err, data) {
                                         if (err) {
                                             return console.log(err)
                                         }
-                                        user.point++
-                                        user.save()
+                                        User.findOne({_id: login.user_id}, function (err, user) {
+                                            if (err) {
+                                                return console.log(err)
+                                            }
+                                            user.point++
+                                            user.save()
+                                            View.count({news_id: req.params.id})
+                                                .then(views => {
+                                                    return res.json({
+                                                        data: result,
+                                                        views: views,
+                                                        error: null
+                                                    })
+                                                })
+                                        })
+                                    })
+                                } else {
+                                    var data_view = View({
+                                        news_id: req.params.id,
+                                        user_id: login.user_id
+                                    })
+
+                                    data_view.save(function (err, data) {
                                         View.count({news_id: req.params.id})
                                             .then(views => {
                                                 return res.json({
@@ -150,67 +167,50 @@ router.get('/:topic_ascii/:id', function (req, res) {
                                                 })
                                             })
                                     })
-                                })
-                            } else {
-                                var data_view = View({
-                                    news_id: req.params.id,
-                                    user_id: sess.user_id
-                                })
+                                }
+                            })
+                        }
+                    }
+                }
+            })
+        } else {
+            Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
+                if (err) {
+                    return console.log(err)
+                }
+                if (news) {
+                    console.log("here")
+                    console.log(news)
+                    for (var i = 0; i < news.news.length; i++) {
+                        if (news.news[i].id === req.params.id) {
+                            result = news.news[i]
+                            var data_view = View({
+                                news_id: req.params.id,
+                                type: "gift",
+                                topic_ascii: req.params.topic_ascii,
+                                title: result.title,
+                                brief: result.brief,
+                                thumbnail: result.thumbnail,
+                                content: result.content,
+                                count: 1
+                            })
 
-                                data_view.save(function (err, data) {
-                                     View.count({news_id: req.params.id})
-                                        .then(views => {
-                                            return res.json({
-                                                data: result,
-                                                views: views,
-                                                error: null
-                                            })
+                            data_view.save(function (err, data) {
+                                    View.count({news_id: req.params.id})
+                                    .then(views => {
+                                        return res.json({
+                                            data: result,
+                                            views: views,
+                                            error: null
                                         })
-                                })
-                            }
-                        })
-                    }
-                }
-            }
-        })
-    } else {
-        Gift.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-            if (err) {
-                return console.log(err)
-            }
-            if (news) {
-                console.log("here")
-                console.log(news)
-                for (var i = 0; i < news.news.length; i++) {
-                    if (news.news[i].id === req.params.id) {
-                        result = news.news[i]
-                        var data_view = View({
-                            news_id: req.params.id,
-                            user_id: sess.user_id,
-                            type: "gift",
-                            topic_ascii: req.params.topic_ascii,
-                            title: result.title,
-                            brief: result.brief,
-                            thumbnail: result.thumbnail,
-                            content: result.content,
-                            count: 1
-                        })
-
-                        data_view.save(function (err, data) {
-                                View.count({news_id: req.params.id})
-                                .then(views => {
-                                    return res.json({
-                                        data: result,
-                                        views: views,
-                                        error: null
                                     })
-                                })
-                        })
+                            })
+                        }
                     }
                 }
-            }
-        })
-    }
+            })
+        }
+    })
 
 })
 
