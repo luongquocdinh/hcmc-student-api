@@ -86,6 +86,7 @@ router.get('/:topic_ascii', function (req, res) {
                 View.count({news_id: item._id}, function (err, view) {
                     response.push({
                         data: item,
+                        date: moment(result[index].created_at).valueOf(),
                         views: view
                     })
                     index++

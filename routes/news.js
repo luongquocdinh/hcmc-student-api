@@ -4,6 +4,7 @@ var formidable = require('formidable')
 var session = require('express-session')
 var fs = require('fs')
 var util = require('util');
+var moment = require('moment')
 
 var router = express.Router()
 
@@ -81,10 +82,12 @@ router.get('/:topic_ascii', function (req, res) {
         var response = []
         var index = 0
         if (result.length > 0) {
-            result.forEach(function (item) {
-                View.count({news_id: item._id}, function (err, view) {
+            
+            for (var i = 0; i < result.length; i++) {
+                View.count({news_id: result[i]._id}, function (err, view) {
                     response.push({
-                        data: item,
+                        data: result[index],
+                        date: moment(result[index].created_at).valueOf(),
                         views: view
                     })
                     index++
@@ -92,7 +95,7 @@ router.get('/:topic_ascii', function (req, res) {
                         return res.json(responseSuccess(news.topic, response))
                     }
                 })
-            })
+            }
         } else {
             return res.json(responseSuccess(news.topic, result))
         }
