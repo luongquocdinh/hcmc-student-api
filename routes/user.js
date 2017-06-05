@@ -194,9 +194,10 @@ router.post('/set-password/:token', function (req, res) {
 
 // Update profile
 router.post('/profile', function (req, res) {
-  Login.findOne({ token: req.headers.token }, function (err, login) {
+  sess = req.session
+  if (sess.email) {
     if (err) return console.log(err)
-    User.findOne({ email: login.email }, function (err, user) {
+    User.findOne({ email: sess.email }, function (err, user) {
       if (err) return console.log(err)
       var form = new formidable.IncomingForm()
 
@@ -221,18 +222,19 @@ router.post('/profile', function (req, res) {
         return res.json(responseSuccess("Update profile successful", user))
       })
     })
-  })
+  }
 })
 
 // Profile
 router.get('/profile', function (req, res) {
-  Login.findOne({ token: req.headers.token }, function (err, login) {
-    if (err) return console.log(err)
-    User.findOne({ email: login.email }, function (err, user) {
+  sess = req.session
+  console.log(sess)
+  if (sess.email) {
+    User.findOne({ email: sess.email }, function (err, user) {
       if (err) return console.log(err)
       return res.json(responseSuccess("Your Profile", user))
     })
-  })
+  }
 })
 
 // FeedBack
