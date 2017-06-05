@@ -30,8 +30,10 @@ router.get('/', (req, res) => {
                 if (from_now == 'vài giây trước') {
                     data[i].status = 'Sự kiện đang diễn ra'
                 } else {
-                    data[i].status = from_now + ' sự kiện sẽ diễn ra'
+                    data[i].status = 'Sự kiện diễn ra ' + from_now 
                 }
+                data[i].startDate = data[i].startDate.getTime() / 1000
+                data[i].endDate = data[i].endDate.getTime() / 1000
             }
             return res.json({
                 data: data,
