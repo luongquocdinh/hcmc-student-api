@@ -46,7 +46,6 @@ router.post('/', function (req, res) {
     var imageDir = files.avatar.path
     var images = ''
     cloudinary.uploader.upload(imageDir, function(result) {
-        console.log(result.url)
         images = result.url
         var data = User({
           name: fields.name,
@@ -193,37 +192,52 @@ router.post('/set-password/:token', function (req, res) {
 })
 
 // Update profile
-router.post('/profile', function (req, res) {
-  sess = req.session
-  if (sess.email) {
-    if (err) return console.log(err)
-    User.findOne({ email: sess.email }, function (err, user) {
-      if (err) return console.log(err)
-      var form = new formidable.IncomingForm()
+// router.post('/profile', function (req, res) {
+//   sess = req.session
+//   if (sess.email) {
+//     if (err) return console.log(err)
+//     User.findOne({ email: sess.email }, function (err, user) {
+//       if (err) return console.log(err)
+//       var form = new formidable.IncomingForm()
 
-      form.multiples = true
-      form.keepExtensions = true
-      form.uploadDir = path.join(__dirname, './../uploads/avatar')
+//       form.multiples = true
+//       form.keepExtensions = true
+//       form.uploadDir = path.join(__dirname, './../uploads/avatar')
 
-      form.parse(req, function (err, fields, files) {
-        user.name = fields.name
-        user.email = fields.email
-        user.phone = fields.phone
-        imageDir = path.join(__dirname, './../' + user.avatar)
+//       form.parse(req, function (err, fields, files) {
+//         /////////////////////////////////////////
+//         if (err) {
+//           console.log('Error is: ' + err)
+//         }
+//         var imageDir = files.avatar.path
+//         var images = ''
+//         if ()
+//           cloudinary.uploader.upload(imageDir, function(result) {
+//               images = result.url
+//               user.name = fields.name
+//               user.email = fields.email
+//               user.phone = fields.phone
+              
+//           })
+//         /////////////////////////////////////////
+//         user.name = fields.name
+//         user.email = fields.email
+//         user.phone = fields.phone
+//         imageDir = path.join(__dirname, './../' + user.avatar)
 
-        if (files.avatar) {
-          image = files.avatar.path
-          fs.unlinkSync(imageDir)
-          user.avatar = image.substring(image.indexOf('/uploads/avatar/'))
-        }
+//         if (files.avatar) {
+//           image = files.avatar.path
+//           fs.unlinkSync(imageDir)
+//           user.avatar = image.substring(image.indexOf('/uploads/avatar/'))
+//         }
 
-        user.updated_at = new Date()
-        user.save()
-        return res.json(responseSuccess("Update profile successful", user))
-      })
-    })
-  }
-})
+//         user.updated_at = new Date()
+//         user.save()
+//         return res.json(responseSuccess("Update profile successful", user))
+//       })
+//     })
+//   }
+// })
 
 // Profile
 router.get('/profile', function (req, res) {
@@ -234,6 +248,8 @@ router.get('/profile', function (req, res) {
       if (err) return console.log(err)
       return res.json(responseSuccess("Your Profile", user))
     })
+  } else {
+    return res.json(responseError("Please Login!!!"))
   }
 })
 
