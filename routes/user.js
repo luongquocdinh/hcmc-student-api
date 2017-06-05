@@ -128,17 +128,14 @@ router.post('/login', function (req, res) {
 
 // Logout
 router.post('/logout', function (req, res) {
-  var token = req.body.token
-  Login.findOne({ token: token, is_active: true }, function (err, user) {
-    if (!user) {
-      return res.json(responseError("Logout feild"))
-    } else {
-      user.is_active = false
-      user.updated_at = new Date()
-      user.save()
-      return res.json(responseSuccess("Logout successful", user))
-    }
-  })
+  req.session.destroy( function (err) {
+		if(err) {
+			console.log(err);
+		}
+		else {
+			res.json(responseSuccess("Login success", "Dinh Hai Quan"));
+		}
+	})
 })
 
 // Change Password
