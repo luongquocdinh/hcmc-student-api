@@ -7,6 +7,7 @@ var login = new Schema({
   "is_active": Boolean,
   "name": String,
   "point": Number,
+  "avatar": String,
   "user_id": String,
   "created_at": { type: Date },
   "updated_at"    : { type: Date }

@@ -110,6 +110,7 @@ router.post('/login', function (req, res) {
         "email": user.email,
         "point": user.point,
         "name": user.name,
+        "avatar": user.avatar,
         "user_id": user._id,
         "is_active": true,
         "created_at": new Date(),
