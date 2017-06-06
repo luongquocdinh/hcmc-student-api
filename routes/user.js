@@ -246,14 +246,18 @@ router.post('/profile', function (req, res) {
 router.get('/profile', function (req, res) {
   Login.findOne({ token: req.headers.token }, function (err, login) {
     if (err) return res.json(responseError("Please Login"))
-    User.findOne({ email: login.email }, function (err, user) {
-      if (err) return res.json(responseError("Please Login"))
-      if (user) {
-        return res.json(responseSuccess("Your Profile", user))
-      } else {
-        return res.json(responseError("Please Login"))
-      }
-    })
+    if (login) {
+      User.findOne({ email: login.email }, function (err, user) {
+        if (err) return res.json(responseError("Please Login"))
+        if (user) {
+          return res.json(responseSuccess("Your Profile", user))
+        } else {
+          return res.json(responseError("Please Login"))
+        }
+      })
+    } else {
+      return res.json(responseError("Please Login"))
+    }
   })
 })
 
