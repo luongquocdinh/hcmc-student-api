@@ -1,192 +1,135 @@
-var express = require('express')
-var path = require('path')
-var formidable = require('formidable')
-var session = require('express-session')
-var fs = require('fs')
-var util = require('util');
-var moment = require('moment')
+let express = require('express')
+let path = require('path')
+let formidable = require('formidable')
+let session = require('express-session')
+let fs = require('fs')
+let util = require('util');
+let moment = require('moment')
 
-var router = express.Router()
+let router = express.Router()
 
-var responseSuccess = require('./../helper/responseSuccess')
-var responseError = require('./../helper/responseError')
+let responseSuccess = require('./../helper/responseSuccess')
+let responseError = require('./../helper/responseError')
 
-var User = require('./../models/user')
-var Login = require('./../models/login')
-var Activity = require('./../models/activity')
-var View = require('./../models/view')
-var Comment = require('./../models/comment')
+let User = require('./../models/user')
+let Login = require('./../models/login')
+let News = require('./../models/news')
+let View = require('./../models/view')
+let Comment = require('./../models/comment')
 
-var sess;
-var per_page = 10;
+let per_page = 10;
 
 // API get list News
 router.get('/', function (req, res) {
-    sess = req.session
-    Activity.find({})
-        .sort({_id: -1})
+    let response = []
+    News.find({source: 'activity', is_accept: true})
+        .sort({datetime: -1})
         .then(data => {
-            for(var i = 0; i < data.length; i++) {
-                data[i].news.sort(function (a, b) {
-                    return new Date(b.updated_at) - new Date(a.updated_at)
-                })
+            let topic = []
+            let keys = []
+            let news = {}
+            let prev
+
+            for (let i = 0; i < data.length; i++) {
+                topic.push(data[i].topic)
             }
-            return data
-        })
-        .then(news => {
-            var data = []
-            for (var i = 0; i < news.length; i++) {
-                var element = {
-                    "topic": news[i].topic,
-                    "news": news[i].news.slice(0, 4)
+            topic.sort()
+            for (let i = 0; i < topic.length; i++) {
+                if (topic[i] !== prev) {
+                    keys.push(topic[i])
                 }
-                data.push(element)
+                prev = topic[i]
             }
-            var response = []
-            var index = 0
-            for (var i = 0; i < data.length; i++) {
-                if (typeof data[i].news[0] !== 'undefined') {
-                    View.count({news_id: data[i].news[0]._id}, function (err, view) {
-                        if (view) {
-                            response.push({
-                                data: data[index],
-                                views: view
-                            })
-                        } else {
-                            response.push({
-                                data: data[index],
-                                views: view
-                            })
-                        }
-                        if (index + 1 == i) {
-                            return res.json(responseSuccess("Hoạt động", response))
-                        }
-                        index++
-                    })
-                } else {
-                    index++
+            
+            for (let i = 0; i < keys.length; i++) {
+                let index = 1
+                news[keys[i]] = []
+                for (let j = 0; j < data.length; j++) {
+                    if (keys[i] == data[j].topic && index <= 4) {
+                        news[keys[i]].push({
+                            id: data[j]._id,
+                            topic_ascii: data[j].topic_ascii,
+                            title: data[j].title,
+                            brief: data[j].brief,
+                            thumbnail: data[j].thumbnail,
+                            datetime: data[j].datetime,
+                            views: data[j].views
+                        })
+                        index++;
+                    }
                 }
             }
+            return res.json(responseSuccess("Tin Tức", news));
+        }).catch(err => {
+            return res.json(responseError('Request Not Found'));
         })
 })
 
 // API get list news by topic
 router.get('/:topic_ascii', function (req, res) {
-    let page = req.query.page || 1
-    Activity.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-        if (err) return console.log(err)
-        news.news.sort(function (a, b) {
-            return new Date(b.updated_at) - new Date(a.updated_at)
-        })
-        var result = news.news.slice((page - 1)*per_page, per_page*page)
-        var response = []
-        var index = 0
-        if (result.length > 0) {
-            result.forEach(function (item) {
-                View.count({news_id: item._id}, function (err, view) {
-                    response.push({
-                        data: item,
-                        date: moment(result[index].created_at).valueOf(),
-                        views: view
-                    })
-                    index++
-                    if (index == result.length) {
-                        return res.json(responseSuccess(news.topic, response))
-                    }
+    let page = req.query.page || 1;
+    let topic_ascii = req.params.topic_ascii;
+    News.find({topic_ascii: topic_ascii, is_accept: true})
+        .sort({datetime: -1})
+        .skip(per_page * (page - 1))
+        .limit(per_page)
+        .then(data => {
+            let response = []
+            let topic
+            data.map(r => {
+                topic = r.topic
+                response.push({
+                    id: r._id,
+                    topic_ascii: r.topic_ascii,
+                    title: r.title,
+                    brief: r.brief,
+                    thumbnail: r.thumbnail,
+                    datetime: r.datetime,
+                    views: r.views
                 })
             })
-        } else {
-            return res.json(responseSuccess(news.topic, result))
-        }
-    })
+            let result = {
+                total_page: Math.ceil(data.length / per_page),
+                page,
+                per_page,
+                response
+            }
+            return res.json(responseSuccess(topic, result));
+        }).catch(err => {
+            return res.json(responseError('Request Not Found'));
+        })
 })
 
 // API get news
 router.get('/:topic_ascii/:id', function (req, res) {
-    var result
+    let topic_ascii = req.params.topic_ascii
+    let id = req.params.id
     Login.findOne({ token: req.headers.token }, function (err, login) {
         if (login) {
-            console.log("here")
-            Activity.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-                if (err) return console.log(err)
-                if (news) {
-                    for (var i = 0; i < news.news.length; i++) {
-                        if (news.news[i].id === req.params.id) {
-                            result = news.news[i]
-                            View.findOne({
-                                $and: [
-                                    {news_id: req.params.id, user_id: login.user_id}
-                                ]
-                            })
-                            .then(r => {
-                                if (!r) {
-                                    var data_view = View({
-                                        news_id: req.params.id,
-                                        user_id: login.user_id,
-                                        type: "activity",
-                                        topic_ascii: req.params.topic_ascii,
-                                        title: result.title,
-                                        brief: result.brief,
-                                        thumbnail: result.thumbnail,
-                                        content: result.content,
-                                        count: 1
-                                    })
-
-                                    data_view.save(function (err, data) {
-                                        if (err) {
-                                            return console.log(err)
-                                        }
-                                        User.findOne({_id: login.user_id}, function (err, user) {
-                                            if (err) {
-                                                return console.log(err)
-                                            }
-                                            user.point++
-                                            user.save()
-                                            View.count({news_id: req.params.id})
-                                                .then(views => {
-                                                    return res.json({
-                                                        data: result,
-                                                        views: views,
-                                                        error: null
-                                                    })
-                                                }) 
-                                        })
-                                    })
-                                } else {
-                                    var data_view = View({
-                                        news_id: req.params.id,
-                                        user_id: login.user_id
-                                    })
-
-                                    data_view.save(function (err, data) {
-                                        View.count({news_id: req.params.id})
-                                            .then(views => {
-                                                return res.json({
-                                                    data: result,
-                                                    views: views,
-                                                    error: null
-                                                })
-                                            })
-                                    })
-                                }
-                            })
-                        }
+            News.findOne({_id: id})
+                .then(data => {
+                    data.views++
+                    data.save()
+                    let result = {
+                        title: data.title,
+                        brief: data.brief,
+                        thumbnail: data.thumbnail,
+                        datetime: data.datetime,
+                        content: data.content,
+                        author: data.author,
+                        views: data.views
                     }
-                }
-            })
-        } else {
-            Activity.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-                if (err) {
-                    return console.log(err)
-                }
-                if (news) {
-                    for (var i = 0; i < news.news.length; i++) {
-                        if (news.news[i].id === req.params.id) {
-                            result = news.news[i]
-                            var data_view = View({
-                                news_id: req.params.id,
-                                type: "activity",
-                                topic_ascii: req.params.topic_ascii,
+                    View.findOne({
+                        $and: [
+                            {news_id: req.params.id, user_id: login.user_id}
+                        ]
+                    }).then(r => {
+                        if (!r) {
+                            let data_view = View({
+                                news_id: id,
+                                user_id: login.user_id,
+                                type: "news",
+                                topic_ascii: topic_ascii,
                                 title: result.title,
                                 brief: result.brief,
                                 thumbnail: result.thumbnail,
@@ -195,71 +138,51 @@ router.get('/:topic_ascii/:id', function (req, res) {
                             })
 
                             data_view.save(function (err, data) {
-                                    View.count({news_id: req.params.id})
-                                    .then(views => {
-                                        return res.json({
-                                            data: result,
-                                            views: views,
-                                            error: null
-                                        })
+                                if (err) {
+                                    return console.log(err)
+                                }
+                                User.findOne({_id: login.user_id}, function (err, user) {
+                                    if (err) {
+                                        return console.log(err)
+                                    }
+                                    user.point = user.point + 10
+                                    user.save()
+                                    return res.json({
+                                        data: result,
+                                        error: null
                                     })
+                                })
+                            })
+                        } else {
+                            return res.json({
+                                data: result,
+                                error: null
                             })
                         }
+                    })
+                })
+        } else {
+            News.findOne({_id: id})
+                .then(data => {
+                    data.views++;
+                    data.save();
+                    let result = {
+                        title: data.title,
+                        brief: data.brief,
+                        thumbnail: data.thumbnail,
+                        datetime: data.datetime,
+                        content: data.content,
+                        author: data.author,
+                        views: data.views
                     }
-                }
-            })
+                    return res.json({
+                        data: result,
+                        error: null
+                    })
+                })
         }
     })
 
 })
 
-// API get comment
-router.get('/:topic_ascii/:id/comment', function (req, res) {
-    Comment.find({news_id: req.params.id})
-        .sort({"created_at": -1})
-        .then(r => {
-            return res.json({
-                data: r,
-                error: null
-            })
-        })
-        .catch(err => {
-            return res.json({
-                data: null,
-                error: err
-            })
-        })
-})
-
-// API post comment
-router.post('/:topic_ascii/:id/comment', function (req, res) {
-    var sess = req.session
-    var content = req.body.content
-    Activity.findOne({topic_ascii: req.params.topic_ascii}, function (err, news) {
-        if (err) return console.log(err)
-        if (news) {
-            for (var i = 0; i < news.news.length; i++) {
-                if (news.news[i].id === req.params.id) {
-                    var comment = Comment({
-                        content: content,
-                        username: sess.name,
-                        user_id: sess.user_id,
-                        topic_id: req.params.id,
-                        news_id: req.params.id
-                    })
-
-                    comment.save(function (err) {
-                        if (err) {
-                            return console.log(err)
-                        }
-                        return res.json({
-                            data: comment,
-                            error: null
-                        })
-                    })
-                }
-            }
-        }
-    })
-})
 module.exports = router

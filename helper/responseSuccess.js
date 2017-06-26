@@ -5,9 +5,7 @@ module.exports = function (message, data) {
             "message": message,
             "success": 1
         },
-        "response": {
-            data
-        }
+        data
     }
     return response
 }
