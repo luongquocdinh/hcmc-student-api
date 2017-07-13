@@ -185,4 +185,56 @@ router.get('/:topic_ascii/:id', function (req, res) {
 
 })
 
+// API postcomment
+router.post('/:topic_ascii/:id/comment', (req, res) => {
+    let topic_ascii = req.params.topic_ascii
+    let id = req.params.id
+    let content = req.body.content
+    Login.findOne({ token: req.headers.token }, function (err, login) {
+        if (login) {
+            News.findOne({_id: id})
+                .then(news => {
+                    let data = Comment({
+                        name: login.name,
+                        user_id: login.user_id,
+                        avatar: login.avatar,
+                        content: content,
+                        news_id: id
+                    });
+                    data.save(function (err) {
+                        if (err) {
+                            return res.json(responseError("Comment error"));
+                        }
+                        return res.json(responseSuccess("Comment", data));
+                    })
+                })
+        } else {
+            return res.json(responseError("Please Login"));
+        }
+    })
+})
+
+// API get comment
+router.get('/:topic_ascii/:id/comment', (req, res) => {
+    let topic_ascii = req.params.topic_ascii
+    let id = req.params.id
+    let response = []
+     Comment.find({news_id: id})
+        .then(comment => {
+            comment.map(p => {
+                response.push({
+                    name: p.name,
+                    avatar: p.avatar,
+                    content: p.content
+                })
+            })
+            return res.json(responseSuccess("List Comment", response));
+        }).catch(err => {
+            return res.json({
+                data: null,
+                error: err
+            })
+        })
+})
+
 module.exports = router

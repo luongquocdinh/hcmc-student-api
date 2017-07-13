@@ -4,8 +4,8 @@ var Schema = mongoose.Schema
 var comment = new Schema({
     "news_id": {type: String},
     "user_id": {type: String},
-    "topic_id": {type: String},
-    "username": {type: String},
+    "avatar": {type: String},
+    "name": {type: String},
     "content": {type: String},
     "created_at": { type: Date, default: Date.now()},
     "updated_at"    : { type: Date, default: Date.now() }

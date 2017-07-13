@@ -116,7 +116,6 @@ router.post('/login', function (req, res) {
         "created_at": new Date(),
         "updated_at": new Date()
       })
-      console.log(data)
       data.save(function (err) {
         if (err) {
           return console.log(err)
