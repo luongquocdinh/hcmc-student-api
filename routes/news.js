@@ -27,7 +27,7 @@ router.get('/', function (req, res) {
         .then(data => {
             let topic = []
             let keys = []
-            let news = {}
+            let news = []
             let prev
 
             for (let i = 0; i < data.length; i++) {
@@ -42,11 +42,14 @@ router.get('/', function (req, res) {
             }
             
             for (let i = 0; i < keys.length; i++) {
-                let index = 1
-                news[keys[i]] = []
+                let index = 1;
+                let news_topic = {
+                    topic: keys[i],
+                    news: []
+                };
                 for (let j = 0; j < data.length; j++) {
                     if (keys[i] == data[j].topic && index <= 4) {
-                        news[keys[i]].push({
+                        news_topic.news.push({
                             id: data[j]._id,
                             topic_ascii: data[j].topic_ascii,
                             title: data[j].title,
@@ -55,9 +58,10 @@ router.get('/', function (req, res) {
                             datetime: data[j].datetime,
                             views: data[j].views
                         })
-                        index++;
+                        index++
                     }
                 }
+                news.push(news_topic);
             }
             return res.json(responseSuccess("Tin Tức", news));
         }).catch(err => {
