@@ -75,8 +75,6 @@ router.get('/:topic_ascii', function (req, res) {
     let topic_ascii = req.params.topic_ascii;
     News.find({topic_ascii: topic_ascii, is_accept: true})
         .sort({datetime: -1})
-        .skip(per_page * (page - 1))
-        .limit(per_page)
         .then(data => {
             let response = []
             let topic
@@ -92,6 +90,9 @@ router.get('/:topic_ascii', function (req, res) {
                     views: r.views
                 })
             })
+            let start = per_page*(page - 1)
+            let end = page*per_page
+            response = response.slice(start, end)
             let result = {
                 total_page: Math.ceil(data.length / per_page),
                 page,
