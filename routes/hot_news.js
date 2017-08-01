@@ -22,8 +22,6 @@ router.get('/', (req, res) => {
     let response = []
     News.find({})
         .sort({views: -1})
-        .skip(per_page * (page - 1))
-        .limit(per_page)
         .then(data => {
             let response = []
             data.map(r => {
@@ -37,6 +35,9 @@ router.get('/', (req, res) => {
                     views: r.views
                 })
             })
+            let start = per_page*(page - 1)
+            let end = page*per_page
+            response = response.slice(start, end)
             let result = {
                 total_page: Math.ceil(data.length / per_page),
                 page,
