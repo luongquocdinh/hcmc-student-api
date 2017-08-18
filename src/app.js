@@ -1,19 +1,21 @@
-var express = require('express')
-var bodyParser = require('body-parser')
-var cookieParser = require('cookie-parser')
-var session = require('express-session')
-var argv = require('optimist').argv
-var app = express()
-var cors = require('cors')
-var routes = require('./../routes/index')
-var user = require('./../routes/user')
-var news = require('./../routes/news')
-var activity = require('./../routes/activity')
-var gift = require('./../routes/gift')
-var event = require('./../routes/event')
-var hot = require('./../routes/hot_news')
-var images = require('./../routes/images')
-var location = require('./../routes/location')
+let express = require('express')
+let bodyParser = require('body-parser')
+let cookieParser = require('cookie-parser')
+let session = require('express-session')
+let argv = require('optimist').argv
+let app = express()
+let cors = require('cors')
+let routes = require('./../routes/index')
+let user = require('./../routes/user')
+let news = require('./../routes/news')
+let activity = require('./../routes/activity')
+let gift = require('./../routes/gift')
+let event = require('./../routes/event')
+let hot = require('./../routes/hot_news')
+let images = require('./../routes/images')
+let location = require('./../routes/location')
+let comment = require('./../routes/comment')
+
 let path = require('path')
 
 app.use(session({
@@ -22,8 +24,8 @@ app.use(session({
   resave: true
 }));
 
-var conf = {
-  port: process.env.PORT || 9000
+let conf = {
+  port: process.env.PORT || 9090
 }
 
 app.set('port', conf.port)
@@ -48,5 +50,6 @@ app.use('/event', event)
 app.use('/hot', hot)
 app.use('/location', location)
 app.use('/images', images)
+app.use('/comment', comment)
 
 module.exports = app
