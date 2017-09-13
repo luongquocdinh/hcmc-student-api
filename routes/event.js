@@ -63,11 +63,21 @@ router.get('/:id', (req, res) => {
              if (from_now == 'vài giây trước') {
                 data.status = 'Sự kiện đang diễn ra'
             } else {
-                data.status = from_now + ' sự kiện sẽ diễn ra'
+                data.status = 'Sự kiện diễn ra ' + from_now 
+            }
+
+            let response = {
+                title: data.title,
+                thumbnail:  data.thumbnail,
+                brief: data.brief,
+                startDate: data.startDate.getTime() / 1000,
+                endDate: data.endDate.getTime() / 1000,
+                content: data.content,
+                is_accept: data.is_accept
             }
             
             return res.json({
-                data: data,
+                data: response,
                 status: data.status,
                 error: null
             })

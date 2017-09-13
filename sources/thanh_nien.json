@@ -1,0 +1,14 @@
+{
+    "_id": "81645950-8327-11e7-97f9-390bc3015c24",
+    "name": "Thanh Niên",
+    "origin_url": "http://thanhnien.vn",
+    "url": "http://thanhnien.vn",
+    "mapped_category": "5911a99f8fc6e3143b065625",
+    "crawler": {
+        "link": [
+            "a.title@href"
+        ]
+    },
+    "is_enable": true,
+    "refresh_rate": 1800
+  }

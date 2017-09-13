@@ -1,0 +1,15 @@
+{
+    "_id": "81645950-8327-11e7-97f9-390bc3015c24",
+    "name": "Giáo Dục",
+    "origin_url": "http://giaoduc.net.vn",
+    "url": "http://giaoduc.net.vn",
+    "mapped_category": "5911a99f8fc6e3143b065625",
+    "crawler": {
+        "link": [
+            "article.featured h2 a@href",
+            "div.listing article h2 a@href"
+        ]
+    },
+    "is_enable": true,
+    "refresh_rate": 1800
+  }
