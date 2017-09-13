@@ -75,7 +75,7 @@ router.post('/', function (req, res) {
               }
             })
           } else {
-            return res.json(responseError("Sign Up Error"))
+            return res.status(400).json(responseError("Email exist"))
           }
         })
     })
