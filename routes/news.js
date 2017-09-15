@@ -65,7 +65,7 @@ router.get('/', function (req, res) {
             }
             return res.json(responseSuccess("Tin Tức", news));
         }).catch(err => {
-            return res.json(responseError('Request Not Found'));
+            return res.status(400).json(responseError('Request Not Found'));
         })
 })
 
@@ -101,7 +101,7 @@ router.get('/:topic_ascii', function (req, res) {
             }
             return res.json(responseSuccess(topic, result));
         }).catch(err => {
-            return res.json(responseError('Request Not Found'));
+            return res.status(400).json(responseError('Request Not Found'));
         })
 })
 
@@ -208,13 +208,13 @@ router.post('/:topic_ascii/:id/comment', (req, res) => {
                     });
                     data.save(function (err) {
                         if (err) {
-                            return res.json(responseError("Comment error"));
+                            return res.status(400).json(responseError("Comment error"));
                         }
                         return res.json(responseSuccess("Comment", data));
                     })
                 })
         } else {
-            return res.json(responseError("Please Login"));
+            return res.status(400).json(responseError("Please Login"));
         }
     })
 })
@@ -235,7 +235,7 @@ router.get('/:topic_ascii/:id/comment', (req, res) => {
             })
             return res.json(responseSuccess("List Comment", response));
         }).catch(err => {
-            return res.json({
+            return res.status(400).json({
                 data: null,
                 error: err
             })

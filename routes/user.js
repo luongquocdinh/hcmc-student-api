@@ -45,39 +45,40 @@ router.post('/', function (req, res) {
     }
     var imageDir = files.avatar.path
     var images = ''
-    cloudinary.uploader.upload(imageDir, function(result) {
-        console.log(result.url)
-        images = result.url
-        var data = User({
-          name: fields.name,
-          email: fields.email,
-          password: crypto.createHash("sha256").update(fields.password).digest('base64'),
-          phone: fields.phone,
-          avatar: images,
-          is_block: false,
-          is_active: false,
-          point: 0,
-          role: 'user',
-          token: crypto.createHash("sha256").update(fields.email).digest('hex'),
-          created_at: new Date(),
-          updated_at: new Date()
-        })
 
-        User.findOne({ email: fields.email }, function (err, user) {
-          if (err) throw err
-          if (!user) {
-            data.save(function (err) {
-              if (err) {
-                throw err
-              } else {
-                sendmail(createMailOpt(data))
-                return res.json(responseSuccess("Sign Up Successful", data))
-              }
-            })
-          } else {
-            return res.status(400).json(responseError("Email exist"))
-          }
+    User.findOne({ email: fields.email }, function (err, user) {
+      if (err) throw err
+      if (!user) {
+        cloudinary.uploader.upload(imageDir, function(result) {
+          console.log(result.url)
+          images = result.url
+          var data = User({
+            name: fields.name,
+            email: fields.email,
+            password: crypto.createHash("sha256").update(fields.password).digest('base64'),
+            phone: fields.phone,
+            avatar: images,
+            is_block: false,
+            is_active: false,
+            point: 0,
+            role: 'user',
+            token: crypto.createHash("sha256").update(fields.email).digest('hex'),
+            created_at: new Date(),
+            updated_at: new Date()
+          })
+  
+          data.save(function (err) {
+            if (err) {
+              throw err
+            } else {
+              sendmail(createMailOpt(data))
+              return res.json(responseSuccess("Sign Up Successful", data))
+            }
+          })
         })
+      } else {
+        return res.status(400).json(responseError("Email exist"))
+      }
     })
   })
 })
@@ -103,7 +104,7 @@ router.post('/login', function (req, res) {
   let secretKey = randomString.generate()
   User.findOne({ email: email, password: password, is_block: false, is_active: true }, function (err, user) {
     if (!user) {
-      return res.json(responseError("Login Feild"))
+      return res.status(400).json(responseError("Login Feild"))
     } else {
       var data = Login({
         "token": crypto.createHmac('sha256', secretKey).update(user.email).digest('hex'),
@@ -136,7 +137,7 @@ router.post('/logout', function (req, res) {
   var token = req.body.token
   Login.findOne({ token: token, is_active: true }, function (err, user) {
     if (!user) {
-      return res.json(responseError("Logout feild"))
+      return res.status(400).json(responseError("Logout feild"))
     } else {
       user.is_active = false
       user.updated_at = new Date()
@@ -150,17 +151,17 @@ router.post('/logout', function (req, res) {
 router.post('/change-password', function (req, res) {
   Login.findOne({ token: req.body.token, is_active: true }, function (err, login) {
     if (!login) {
-      return res.json(responseError("Error handle"))
+      return res.status(400).json(responseError("Error handle"))
     }
 
     User.findOne({ email: login.email }, function (err, user) {
       if (!user) {
-        return res.json(responseError("User not found"))
+        return res.status(400).json(responseError("User not found"))
       } else {
         var oldpassword = crypto.createHash("sha256").update(req.body.oldpassword).digest('base64')
         var newpassword = crypto.createHash("sha256").update(req.body.newpassword).digest('base64')
         if (oldpassword != user.password) {
-          return res.json(responseError("Password not match"))
+          return res.status(400).json(responseError("Password not match"))
         } else {
           user.password = newpassword
           user.save()
@@ -244,18 +245,18 @@ router.post('/profile', function (req, res) {
 // Profile
 router.get('/profile', function (req, res) {
   Login.findOne({ token: req.headers.token }, function (err, login) {
-    if (err) return res.json(responseError("Please Login"))
+    if (err) return res.status(400).json(responseError("Please Login"))
     if (login) {
       User.findOne({ email: login.email }, function (err, user) {
-        if (err) return res.json(responseError("Please Login"))
+        if (err) return res.status(400).json(responseError("Please Login"))
         if (user) {
           return res.json(responseSuccess("Your Profile", user))
         } else {
-          return res.json(responseError("Please Login"))
+          return res.status(400).json(responseError("Please Login"))
         }
       })
     } else {
-      return res.json(responseError("Please Login"))
+      return res.status(400).json(responseError("Please Login"))
     }
   })
 })
@@ -279,7 +280,7 @@ router.post('/feedback', function (req, res) {
       return res.json(responseSuccess("Feedback", data));
     })
   } else {
-    return res.json(responseError("Please Login"));
+    return res.status(400).json(responseError("Please Login"));
   }
 })
 module.exports = router

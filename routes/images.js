@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
             })
         })
         .catch(err => {
-            return res.json({
+            return res.status(400).json({
                 data: null,
                 error: err
             })
@@ -39,7 +39,7 @@ router.get('/:id', (req, res) => {
                 error: null
             })
         }).catch(err => {
-            return res.json({
+            return res.status(400).json({
                 data: null,
                 error: err
             })

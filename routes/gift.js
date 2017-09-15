@@ -65,7 +65,7 @@ router.get('/', function (req, res) {
             }
             return res.json(responseSuccess("Quà Tặng", news));
         }).catch(err => {
-            return res.json(responseError('Request Not Found'));
+            return res.status(400).json(responseError('Request Not Found'));
         })
 })
 
@@ -101,7 +101,7 @@ router.get('/:topic_ascii', function (req, res) {
             }
             return res.json(responseSuccess(topic, result));
         }).catch(err => {
-            return res.json(responseError('Request Not Found'));
+            return res.status(400).json(responseError('Request Not Found'));
         })
 })
 
