@@ -1,17 +1,18 @@
 
 module.exports = function (data) {
     let mailOptions = {
-        from: 'HCMC ADMIN',
+        from: '<hcmc.students@gmail.com>',
         to: data.email,
-        subject: 'HCMC STUDENTS - Nhận mã điện thoại',
+        fromName: "HCMC STUDENTS ADMIN",
+        subject: 'Welcome to HCMC STUDENTS',
         text: 'Hello ' + data.email,
         html: `
             <b>Cám ơn bạn đã sử dụng ứng dụng của chúng tôi.</b>
             <p>Đây là mã thẻ cào của bạn</p>
-            Serial:` + data.serial +
-            `Mã thẻ: ` + data.code +
-            `Nhà mạng: ` + data.network +
-            `Giá trị: ` + data.value
+            Serial:` + data.serial + `<br />` +
+            `Mã thẻ: ` + data.code + `<br />` +
+            `Nhà mạng: ` + data.network + `<br />` +
+            `Giá trị: ` + data.value + `.000 VNĐ`
     };
     return mailOptions
 }

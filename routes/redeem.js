@@ -26,43 +26,53 @@ router.post('/', (req, res) => {
             return res.status(400).json(responseError("Please Login"));
         }
 
-        if (parseInt(value) * 5 > parseInt(login.point)) {
-            return res.status(400).json(responseError("Point not enough"));
-        } else {
-            let data = Redeem({
-                user_id: login.user_id,
-                email: login.email,
-                network: network,
-                value: value
-            });
-    
-            data.save(function (err) {
-                if (err) {
-                    return res.status(500).json(responseError("Server Error, please try again"));
-                }
-            })
-
-            let serial = randomstring.generate({
-                length: 11,
-                charset: 'numeric'
-            });
-    
-            let code = randomstring.generate({
-                length: 13,
-                charset: 'numeric'
-            });
-    
-            let content = {
-                email: email,
-                serial: serial,
-                code: code,
-                network: network,
-                value: value
+        User.findOne({_id: login.user_id}, (err, user) => {
+            if (err) {
+                return res.status(500).json(responseError("Server error"));
             }
-            sendmail(createMailOpt(content))
-             
-            return res.json(responseSuccess("System handling", content));
-        }
+
+            if (parseInt(value) * 5 > parseInt(user.point)) {
+                return res.status(400).json(responseError("Point not enough"));
+            } else {
+                let data = Redeem({
+                    user_id: login.user_id,
+                    email: login.email,
+                    network: network,
+                    value: value
+                });
+        
+                data.save(function (err) {
+                    if (err) {
+                        return res.status(500).json(responseError("Server Error, please try again"));
+                    }
+                })
+
+                let serial = randomstring.generate({
+                    length: 11,
+                    charset: 'numeric'
+                });
+        
+                let code = randomstring.generate({
+                    length: 13,
+                    charset: 'numeric'
+                });
+        
+                let content = {
+                    email: user.email,
+                    serial: serial,
+                    code: code,
+                    network: network,
+                    value: value
+                }
+                
+                user.point = user.point - value * 5;
+                user.save();
+
+                sendmail(createMailOpt(content))
+                
+                return res.json(responseSuccess("System handling", content));
+            }
+        })
     })
 })
 

@@ -111,6 +111,7 @@ router.post('/login', function (req, res) {
         "email": user.email,
         "point": user.point,
         "name": user.name,
+        "phone": user.phone,
         "avatar": user.avatar,
         "user_id": user._id,
         "is_active": true,
