@@ -106,6 +106,7 @@ router.post('/login', function (req, res) {
     if (!user) {
       return res.status(400).json(responseError("Login Feild"))
     } else {
+      
       var data = Login({
         "token": crypto.createHmac('sha256', secretKey).update(user.email).digest('hex'),
         "email": user.email,
@@ -118,6 +119,7 @@ router.post('/login', function (req, res) {
         "created_at": new Date(),
         "updated_at": new Date()
       })
+      
       data.save(function (err) {
         if (err) {
           return console.log(err)

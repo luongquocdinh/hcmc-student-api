@@ -6,6 +6,7 @@ var login = new Schema({
   "token": String,
   "is_active": Boolean,
   "name": String,
+  "phone": String,
   "point": Number,
   "avatar": String,
   "user_id": String,
