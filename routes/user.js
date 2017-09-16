@@ -149,7 +149,7 @@ router.post('/logout', function (req, res) {
 
 // Change Password
 router.post('/change-password', function (req, res) {
-  Login.findOne({ token: req.body.token, is_active: true }, function (err, login) {
+  Login.findOne({ token: req.headers.token, is_active: true }, function (err, login) {
     if (!login) {
       return res.status(400).json(responseError("Error handle"))
     }

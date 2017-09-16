@@ -15,6 +15,7 @@ let hot = require('./../routes/hot_news')
 let images = require('./../routes/images')
 let location = require('./../routes/location')
 let comment = require('./../routes/comment')
+let redeem = require('./../routes/redeem')
 
 let path = require('path')
 
@@ -51,5 +52,6 @@ app.use('/hot', hot)
 app.use('/location', location)
 app.use('/images', images)
 app.use('/comment', comment)
+app.use('/redeem', redeem)
 
 module.exports = app
