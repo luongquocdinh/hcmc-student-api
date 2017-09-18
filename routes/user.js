@@ -50,7 +50,6 @@ router.post('/', function (req, res) {
       if (err) throw err
       if (!user) {
         cloudinary.uploader.upload(imageDir, function(result) {
-          console.log(result.url)
           images = result.url
           var data = User({
             name: fields.name,
@@ -181,12 +180,7 @@ router.post('/recover-password', function (req, res) {
     if (err) {
       return console.log(err)
     }
-    transporter.sendMail(mailRecoverPassword(req.body.email, user.token), (error, info) => {
-      if (error) {
-        return console.log(error);
-      }
-      console.log('Message %s sent: %s', info.messageId, info.response);
-    });
+    sendmail(mailRecoverPassword(req.body.email, user.token));
     return res.json(responseSuccess("Send mail successful", req.body.email))
   })
 })
