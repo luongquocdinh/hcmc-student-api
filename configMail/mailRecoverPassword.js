@@ -6,9 +6,9 @@ module.exports = function (email, token) {
         fromName: "HCMC STUDENTS ADMIN",
         subject: 'Welcome to HCMC STUDENTS',
         text: 'Hello',
-        html: `<b>Click link - Set Password</b> <br>
-            <a href="https://hcmc-student-api.herokuapp.com/user/recover/`+ token +`">Confirm account</a>
-        `
+        html: `
+            Mã đổi lại mật khẩu mới: <b>` + token + `</b><br />`
+        + `<b> Mã chỉ được sử dụng 1 lần </b>`
     };
     return mailOptions
 }

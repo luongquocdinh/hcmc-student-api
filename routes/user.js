@@ -61,7 +61,7 @@ router.post('/', function (req, res) {
             is_active: false,
             point: 0,
             role: 'user',
-            token: crypto.createHash("sha256").update(fields.email).digest('hex'),
+            token: crypto.createHash("sha256").update(fields.email + fields.password).digest('hex'),
             created_at: new Date(),
             updated_at: new Date()
           })
@@ -186,12 +186,13 @@ router.post('/recover-password', function (req, res) {
 })
 
 // Set Password
-router.post('/set-password/:token', function (req, res) {
-  User.findOne({ token: req.params.token }, function (err, user) {
+router.post('/set-password', function (req, res) {
+  User.findOne({ token: req.body.token }, function (err, user) {
     if (err) {
       return console.log(err)
     }
     user.password = crypto.createHash("sha256").update(req.body.password).digest('base64')
+    user.token = crypto.createHash("sha256").update(user.email + req.body.password).digest('base64')
     user.save()
 
     return res.json(responseSuccess("Set Password successful", user))
