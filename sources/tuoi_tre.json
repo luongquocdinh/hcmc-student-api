@@ -1,16 +1,21 @@
 {
-    "_id": "8186fc81-8327-11e7-97f9-390bc3015c24",
     "name": "Tuổi Trẻ",
     "origin_url": "http://tuoitre.vn", 
     "url": "http://tuoitre.vn",
-    "mapped_category": "5911a5728fc6e3143b065623",
     "crawler": {
         "link": [
             "h4 a@href",
             "h3 a@href",
             "ul.list-1 li a@href"
-        ]
+        ],
+        "detail": {
+            "title": "#object_title",
+            "datetime": "span.date",
+            "brief": "p.txt-head",
+            "author": "div.wrapper-qt strong:eq(0)",
+            "content": "div.fck",
+            "thumbnail": "meta[property='og:image']@content"
+        }
     },
-    "is_enable": true,
-    "refresh_rate": 1800
+    "is_enable": true
 }

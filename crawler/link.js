@@ -6,26 +6,40 @@ let url = require('url');
 
 let osmosis = require('osmosis')
 
-fs.readdirSync(sources).forEach(file => {
-    let content = fs.readFileSync(sources + '/' + file, 'utf8')
-    let parse = JSON.parse(content);
 
-    osmosis.get(parse.url)
-        .set({
-            link: parse.crawler.link
+function crawler_link(parse) {
+    let link
+    let parser = []
+    return new Promise((resolve, reject) => {
+        parse.crawler.link.map(r => {
+            parser.push(r);
         })
-        .data(res => {
-            res.link = res.link.map(value => {
-                // parse.origin_url + value
-                let href = decodeURIComponent(trim(value))
-                let hrefInfo = url.parse(href, true, true);
-                
-                if (hrefInfo.protocol != 'http:' && hrefInfo.protocol != 'https:') {
-                    return parse.origin_url + value;
-                } else {
-                    return value;
-                }
-            });
-            console.log(res.link);
+        osmosis.get(parse.url)
+            .set({
+                "link": parser
+            })
+            .data((res) => {
+                res.link = res.link.map(value => {
+                    let href = decodeURIComponent(trim(value))
+                    let hrefInfo = url.parse(href, true, true);
+                    
+                    if (hrefInfo.protocol != 'http:' && hrefInfo.protocol != 'https:') {
+                        return parse.origin_url + value;
+                    } else {
+                        return value;
+                    }
+                });
+                link = res.link
+            })
+            .done(() => resolve(link))
+            .error(error => {
+                console.log("ERROR: " + error);
+                reject(error);
+            })
+            .debug(console.log)
         })
-})  
+}
+
+module.exports = {
+    crawler_link: crawler_link
+}

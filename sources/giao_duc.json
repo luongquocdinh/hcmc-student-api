@@ -1,15 +1,20 @@
 {
-    "_id": "81645950-8327-11e7-97f9-390bc3015c24",
     "name": "Giáo Dục",
     "origin_url": "http://giaoduc.net.vn",
     "url": "http://giaoduc.net.vn",
-    "mapped_category": "5911a99f8fc6e3143b065625",
     "crawler": {
         "link": [
             "article.featured h2 a@href",
             "div.listing article h2 a@href"
-        ]
+        ],
+        "detail": {
+            "title": "h1.title",
+            "datetime": "div.content-right article:eq(0) header:eq(0) time:eq(0)",
+            "brief": "div.content-right article:eq(0) header:eq(0) p.summary:eq(0)",
+            "author": "p.author",
+            "content": "div.body",
+            "thumbnail": "meta[property='og:image']@content"
+        }
     },
-    "is_enable": true,
-    "refresh_rate": 1800
+    "is_enable": true
   }
