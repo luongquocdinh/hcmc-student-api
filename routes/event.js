@@ -99,37 +99,43 @@ router.get('/:id', (req, res) => {
 
 router.post('/register', (req, res) => {
     let id = req.body.id
-    let email = req.body.email
-    let phone = req.body.phone
-    let name = req.body.name
 
-    Event.findOne({_id: id})
-        .then(event => {
-            if (!event) {
-                return res.status(401).json(responseError("Event not exits"));
+    Login.findOne({token: req.headers.token})
+        .then(login => {
+            if(!login) {
+                return res.json(401).json(responseError("Please Login"));
             }
 
-            return event;
+            return login;
         })
-        .then(data => {
-            let info = eventRegister({
-                event_id: id,
-                email: email,
-                phone: phone,
-                name: name
-            });
-
-            sendmail(createMailOpt(info, data));
-
-            info.save((err) => {
-                if (err) {
-                    return res.status(500).json(responseError("Server Error"));
-                }
-
-                return res.json(responseSuccess("Register Event Successful", info))
-            })
-        })
-    
+        .then(user => {
+            Event.findOne({_id: id})
+                .then(event => {
+                    if (!event) {
+                        return res.status(401).json(responseError("Event not exits"));
+                    }
+        
+                    return event;
+                })
+                .then(data => {
+                    let info = eventRegister({
+                        event_id: id,
+                        email: user.email,
+                        phone: user.phone,
+                        name: user.name
+                    });
+        
+                    sendmail(createMailOpt(info, data));
+        
+                    info.save((err) => {
+                        if (err) {
+                            return res.status(500).json(responseError("Server Error"));
+                        }
+        
+                        return res.json(responseSuccess("Register Event Successful", info))
+                    })
+                })
+        })    
 })
 
 module.exports = router
