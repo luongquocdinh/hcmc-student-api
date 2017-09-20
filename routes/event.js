@@ -3,9 +3,16 @@ var path = require('path')
 var router = express.Router()
 var moment = require('moment')
 
+var responseSuccess = require('./../helper/responseSuccess')
+var responseError = require('./../helper/responseError')
+
+let sendmail = require('./../configMail/MailSenderPromise')
+let createMailOpt = require('./../configMail/mailEvent')
+
 var User = require('./../models/user')
 var Login = require('./../models/login')
 var Event = require('./../models/event')
+var eventRegister = require('./../models/event_register');
 
 moment.locale('vi')
 
@@ -88,6 +95,41 @@ router.get('/:id', (req, res) => {
                 error: err
             })
         })
+})
+
+router.post('/register', (req, res) => {
+    let id = req.body.id
+    let email = req.body.email
+    let phone = req.body.phone
+    let name = req.body.name
+
+    Event.findOne({_id: id})
+        .then(event => {
+            if (!event) {
+                return res.status(401).json(responseError("Event not exits"));
+            }
+
+            return event;
+        })
+        .then(data => {
+            let info = eventRegister({
+                event_id: id,
+                email: email,
+                phone: phone,
+                name: name
+            });
+
+            sendmail(createMailOpt(info, data));
+
+            info.save((err) => {
+                if (err) {
+                    return res.status(500).json(responseError("Server Error"));
+                }
+
+                return res.json(responseSuccess("Register Event Successful", info))
+            })
+        })
+    
 })
 
 module.exports = router

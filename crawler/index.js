@@ -1,3 +1,4 @@
+var chrono = require('chrono-node');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://heroku_ncdhz4rn:j51dpjdmpitu8v7onnt61uhi56@ds133281.mlab.com:33281/heroku_ncdhz4rn', function (err, result) {
     if (err) return console.log(err)
@@ -5,6 +6,7 @@ mongoose.connect('mongodb://heroku_ncdhz4rn:j51dpjdmpitu8v7onnt61uhi56@ds133281.
 })
 
 let Source = require('./../models/source');
+let News = require('./../models/news');
 let Link = require('./../models/link');
 let link = require('./link');
 let detail = require('./detail');
@@ -49,8 +51,22 @@ Link.find({is_enable: true})
             Source.findOne({_id: p.source_id})
                 .then(s => {
                     detail.crawler_detail(p.link, s.crawler.detail)
-                        .then(data => {
-                            console.log(data);
+                        .then(res => {
+                            let data = News({
+                                source: "news",
+                                topic: "Tin Tức Tổng Hợp",
+                                topic_ascii: "tin-tuc-tong-hop",
+                            
+                                title: res.title,
+                                thumbnail: res.thumbnail,
+                                brief: res.brief,
+                                content: res.content,
+                                author: res.author,
+                                is_accept: true,
+                                datetime: chrono.parseDate(res.datetime).getTime() / 1000
+                            })
+                            console.log("Done:", p.link);
+                            data.save()
                             p.is_enable = false;
                             p.save();
                         })
@@ -63,3 +79,11 @@ Link.find({is_enable: true})
     .catch(err => {
         console.log(err);
     })
+
+// News.remove({topic_ascii: "tin-tuc-tong-hop"})
+//     .then(r => {
+//         console.log("Done");
+//     })
+//     .catch(err => {
+//         console.log(err)
+//     })
