@@ -135,6 +135,9 @@ router.post('/register', (req, res) => {
                         return res.json(responseSuccess("Register Event Successful", info))
                     })
                 })
+                .catch(err => {
+                    return res.status(400).json(responseError("Event not exits"));
+                })
         })    
 })
 
