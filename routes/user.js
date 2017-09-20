@@ -184,10 +184,15 @@ router.post('/change-password', function (req, res) {
 router.post('/recover-password', function (req, res) {
   User.findOne({ email: req.body.email }, function (err, user) {
     if (err) {
-      return console.log(err)
+      return res.status(500).json(responseError("Server Error"))
     }
-    sendmail(mailRecoverPassword(req.body.email, user.token));
-    return res.json(responseSuccess("Send mail successful", req.body.email))
+    if (user) {
+      sendmail(mailRecoverPassword(req.body.email, user.token));
+      return res.json(responseSuccess("Send mail successful", req.body.email))
+    } else {
+      return res.status(401).json(responseError("User not exits"));
+    }
+      
   })
 })
 
