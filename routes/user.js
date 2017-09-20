@@ -2,7 +2,7 @@ var express = require('express')
 var path = require('path')
 var crypto = require('crypto')
 var session = require('express-session')
-var randomString = require('randomstring')
+var randomstring = require('randomstring')
 // var nodemailer = require('nodemailer')
 var formidable = require('formidable')
 var fs = require('fs')
@@ -61,7 +61,10 @@ router.post('/', function (req, res) {
             is_active: false,
             point: 0,
             role: 'user',
-            token: crypto.createHash("sha256").update(fields.email + fields.password).digest('hex'),
+            token: randomstring.generate({
+                length: 7,
+                charset: 'alphanumeric'
+            }),
             created_at: new Date(),
             updated_at: new Date()
           })
@@ -89,7 +92,10 @@ router.get('/active/:token', function (req, res) {
       return console.log(err)
     }
     user.is_active = true
-    user.token = randomString.generate()
+    user.token = randomstring.generate({
+        length: 8,
+        charset: 'alphanumeric'
+    })
     user.save()
     return res.json(responseSuccess("Active user successful", user))
   })
@@ -100,7 +106,7 @@ router.post('/login', function (req, res) {
   sess = req.session;
   var email = req.body.email
   var password = crypto.createHash("sha256").update(req.body.password).digest('base64')
-  let secretKey = randomString.generate()
+  let secretKey = randomstring.generate()
   User.findOne({ email: email, password: password, is_block: false, is_active: true }, function (err, user) {
     if (!user) {
       return res.status(400).json(responseError("Login Feild"))
