@@ -25,23 +25,6 @@ router.get('/', (req, res) => {
         .lean()
         .exec()
         .then(data => {
-            for (var i = 0; i < data.length; i++) {
-                let d = new Date()
-                let year = new Date(data[i].endDate).getFullYear()
-                let month = new Date(data[i].endDate).getMonth() + 1
-                let date = new Date(data[i].endDate).getDate()
-                let hours = d.getHours()
-                let minutes = d.getMinutes()
-                let seconds = d.getSeconds()
-                let from_now = moment([year, month, date, hours, minutes, seconds ], "YYYYMMDD h:mm:ss").fromNow();
-                if (from_now == 'vài giây trước') {
-                    data[i].status = 'Sự kiện đang diễn ra'
-                } else {
-                    data[i].status = 'Sự kiện diễn ra ' + from_now 
-                }
-                data[i].startDate = data[i].startDate.getTime() / 1000
-                data[i].endDate = data[i].endDate.getTime() / 1000
-            }
             return res.json({
                 data: data,
                 error: null
