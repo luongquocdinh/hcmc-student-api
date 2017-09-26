@@ -21,6 +21,7 @@ var responseError = require('./../helper/responseError')
 var User = require('./../models/user')
 var Login = require('./../models/login')
 var FeedBack = require('./../models/feedback')
+var FeedBackComment = require('./../models/feedback_comment');
 
 var sess;
 
@@ -291,5 +292,30 @@ router.post('/feedback', function (req, res) {
   } else {
     return res.status(400).json(responseError("Please Login"));
   }
+})
+
+router.post('/feedback/comment', (req, res) => {
+  let token = req.headers.token;
+  let comment_id = req.body.comment_id
+
+  Login.findOne({token: token})
+    .then(login => {
+      if (!login) {
+        return res.status(401).json(responseError("Please Login"));
+      }
+      return login;
+    })
+    .then(login => {
+      let data = FeedBackComment({
+        user_id: login.user_id,
+        comment_id: comment_id
+      });
+
+      data.save();
+      return res.json(responseSuccess("report comment success", data));
+    })
+    .catch(err => {
+      return res.status(400).json(responseError("Bad request"));
+    })
 })
 module.exports = router

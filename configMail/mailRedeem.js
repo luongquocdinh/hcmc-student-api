@@ -5,14 +5,12 @@ module.exports = function (data) {
         to: data.email,
         fromName: "HCMC STUDENTS ADMIN",
         subject: 'Welcome to HCMC STUDENTS',
-        text: 'Hello ' + data.email,
+        text: 'Hello ' + data.name,
         html: `
-            <b>Cám ơn bạn đã sử dụng ứng dụng của chúng tôi.</b>
-            <p>Đây là mã thẻ cào của bạn</p>
-            Serial:` + data.serial + `<br />` +
-            `Mã thẻ: ` + data.code + `<br />` +
-            `Nhà mạng: ` + data.network + `<br />` +
-            `Giá trị: ` + data.value + `.000 VNĐ`
+            Cám ơn bạn <b>` + data.name + ` </b>đã sử dụng ứng dụng của chúng tôi.
+            <p>Đây là mã nhận thưởng của bạn</p>
+            Serial: <b>` + data.serial + `</b><br />` +
+            `Vật phẩm là: <b>` + data.reward + `</b><br />`
     };
     return mailOptions
 }
