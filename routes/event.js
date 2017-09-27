@@ -25,6 +25,22 @@ router.get('/', (req, res) => {
         .lean()
         .exec()
         .then(data => {
+            data = data.map(r => {
+                return {
+                    id: r._id,
+                    title: r.title,
+                    thumbnail: r.thumbnail,
+                    brief: r.brief,
+                    startDate: r.startDate,
+                    endDate: r.endDate,
+                    content: r.content,
+                    number: r.number,
+                    number_register: r.number_register,
+                    rest: r.number - r.number_register,
+                    address: r.address,
+                    deadline: r.deadline
+                }
+            })
             return res.json({
                 data: data,
                 error: null
@@ -40,39 +56,14 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     var id = req.params.id
-    Event.findOne({_id: id})
+    Event.findOne({ _id: id })
         .then(data => {
-            let d = new Date()
-            let year = new Date(data.endDate).getFullYear()
-            let month = new Date(data.endDate).getMonth() + 1
-            let date = new Date(data.endDate).getDate()
-            let hours = d.getHours()
-            let minutes = d.getMinutes()
-            let seconds = d.getSeconds()
-            let from_now = moment([year, month, date, hours, minutes, seconds ], "YYYYMMDD h:mm:ss").fromNow()
-             if (from_now == 'vài giây trước') {
-                data.status = 'Sự kiện đang diễn ra'
-            } else {
-                data.status = 'Sự kiện diễn ra ' + from_now 
-            }
-
-            let response = {
-                title: data.title,
-                thumbnail:  data.thumbnail,
-                brief: data.brief,
-                startDate: data.startDate.getTime() / 1000,
-                endDate: data.endDate.getTime() / 1000,
-                content: data.content,
-                is_accept: data.is_accept
-            }
-            
             return res.json({
-                data: response,
-                status: data.status,
+                data: data,
                 error: null
             })
         })
-        .catch( err => {
+        .catch(err => {
             return res.status(400).json({
                 data: null,
                 error: err
@@ -83,45 +74,56 @@ router.get('/:id', (req, res) => {
 router.post('/register', (req, res) => {
     let id = req.body.id
 
-    Login.findOne({token: req.headers.token})
+    Login.findOne({ token: req.headers.token })
         .then(login => {
-            if(!login) {
+            if (!login) {
                 return res.json(401).json(responseError("Please Login"));
             }
 
             return login;
         })
         .then(user => {
-            Event.findOne({_id: id})
+            Event.findOne({ _id: id })
                 .then(event => {
                     if (!event) {
                         return res.status(401).json(responseError("Event not exits"));
                     }
-        
+
                     return event;
                 })
                 .then(data => {
-                    let info = eventRegister({
-                        event_id: id,
-                        email: user.email,
-                        phone: user.phone,
-                        name: user.name
-                    });
-        
-                    sendmail(createMailOpt(info, data));
-        
-                    info.save((err) => {
-                        if (err) {
-                            return res.status(500).json(responseError("Server Error"));
-                        }
-        
-                        return res.json(responseSuccess("Register Event Successful", info))
-                    })
+                    if (data.number == data.number_register) {
+                        return res.status(401).json(responseError("Number enough"));
+                    }
+
+                    eventRegister.findOne({ event_id: id, email: user.email })
+                        .then(check => {
+                            if (check) {
+                                return res.status(401).json(responseError("You have register"));
+                            }
+
+                            let info = eventRegister({
+                                event_id: id,
+                                email: user.email,
+                                phone: user.phone,
+                                name: user.name
+                            });
+                            data.number_register = data.number_register + 1;
+                            sendmail(createMailOpt(info, data));
+                            data.save();
+                            info.save((err) => {
+                                if (err) {
+                                    return res.status(500).json(responseError("Server Error"));
+                                }
+
+                                return res.json(responseSuccess("Register Event Successful", info))
+                            })
+                        })
                 })
                 .catch(err => {
                     return res.status(400).json(responseError("Event not exits"));
                 })
-        })    
+        })
 })
 
 module.exports = router
