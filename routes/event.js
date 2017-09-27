@@ -58,6 +58,20 @@ router.get('/:id', (req, res) => {
     var id = req.params.id
     Event.findOne({ _id: id })
         .then(data => {
+            data = {
+                id: data._id,
+                title: data.title,
+                thumbnail: data.thumbnail,
+                brief: data.brief,
+                startDate: data.startDate,
+                endDate: data.endDate,
+                content: data.content,
+                number: data.number,
+                number_register: data.number_register,
+                rest: data.number - data.number_register,
+                address: data.address,
+                deadline: data.deadline
+            }
             return res.json({
                 data: data,
                 error: null
