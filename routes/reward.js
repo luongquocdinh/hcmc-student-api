@@ -23,11 +23,13 @@ router.get('/', (req, res) => {
                     name: p.name,
                     thumbnail: p.thumbnail,
                     detail: p.detail,
+                    point:p.point,
                     number: p.number,
                     number_redeem: p.number_redeem,
                     rest: p.number - p.number_redeem,
                     deadline: p.deadline,
                     is_enable: p.is_enable,
+                    created_at: Date.parse(p.created_at)
                 }
             })
             return res.json(responseSuccess("List Reward", data))
@@ -46,11 +48,13 @@ router.get('/:id', (req, res) => {
                 name: data.name,
                 thumbnail: data.thumbnail,
                 detail: data.detail,
+                point: data.point,
                 number: data.number,
                 number_redeem: data.number_redeem,
                 rest: data.number - data.number_redeem,
                 deadline: data.deadline,
                 is_enable: data.is_enable,
+                created_at: Date.parse(data.created_at)
             }
 
             return res.json(responseSuccess("Reward", data));
