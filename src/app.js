@@ -20,6 +20,9 @@ let reward = require('./../routes/reward')
 
 let path = require('path')
 
+var schedule = require('node-schedule');
+let crawler = require('./../crawler/index');
+
 app.use(session({
   secret: 'hcmc-student',
   saveUninitialized: true,
@@ -42,6 +45,12 @@ app.use(express.query())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static('public'))
+
+
+schedule.scheduleJob('0 6 * * *', function() {
+  crawler.link();
+  crawler.detail();
+});
 
 app.use('/', routes)
 app.use('/user', user)

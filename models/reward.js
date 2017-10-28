@@ -9,8 +9,14 @@ var reward = new Schema({
     point: {type: Number},
 
     number: {type: Number},
-    number_redeem: {type: Number},
+    number_redeem: {type: Number, default: 0},
     deadline: {type: Number},
+
+    partner: [{
+        name: {type: String},
+        address: {type: String},
+        number: {type: Number}
+    }],
 
     is_enable: {type: Boolean, default: true},
 

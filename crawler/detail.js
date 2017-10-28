@@ -8,7 +8,7 @@ function crawler_detail(url, parse) {
         "title": parse.title,
         "thumbnail": parse.thumbnail,
         "brief": parse.brief,
-        "content": parse.content,
+        "content": parse.content + ':html',
         "author": parse.author,
         "datetime": parse.datetime
     }
@@ -17,6 +17,9 @@ function crawler_detail(url, parse) {
             .get(url)
             .set(p)
             .data((res) => {
+                if (!res.title || !res.content) {
+                    reject(null);
+                }
                 resolve(res)
             })
             .error(error => {

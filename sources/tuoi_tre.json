@@ -9,10 +9,10 @@
             "ul.list-1 li a@href"
         ],
         "detail": {
-            "title": "#object_title",
+            "title": "h1",
             "datetime": "span.date",
-            "brief": "p.txt-head",
-            "author": "div.wrapper-qt strong:eq(0)",
+            "brief": "h2.txt-head",
+            "author": "div.author",
             "content": "div.fck",
             "thumbnail": "meta[property='og:image']@content"
         }
