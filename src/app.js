@@ -48,9 +48,6 @@ app.use(express.static('public'))
 
 schedule.scheduleJob('0 * * * *', function() {
   crawler.detail();
-});
-
-schedule.scheduleJob('0 * * * *', function() {
   crawler.link();
 });
 
