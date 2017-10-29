@@ -46,9 +46,9 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static('public'))
 
-schedule.scheduleJob('0 * * * *', function() {
-  crawler.detail();
+schedule.scheduleJob('*/5 * * * *', function() {
   crawler.link();
+  crawler.detail();
 });
 
 app.use('/', routes)
