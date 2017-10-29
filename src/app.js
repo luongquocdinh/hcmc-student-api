@@ -46,22 +46,7 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static('public'))
 
-schedule.scheduleJob('0 0 * * *', function() {
-  crawler.link();
-  crawler.detail();
-});
-
-schedule.scheduleJob('0 6 * * *', function() {
-  crawler.link();
-  crawler.detail();
-});
-
-schedule.scheduleJob('0 12 * * *', function() {
-  crawler.link();
-  crawler.detail();
-});
-
-schedule.scheduleJob('0 18 * * *', function() {
+schedule.scheduleJob('0 * * * *', function() {
   crawler.link();
   crawler.detail();
 });
