@@ -7,10 +7,10 @@
             "a.title@href"
         ],
         "detail": {
-            "title": "h1.main-title",
-            "datetime": "time",
-            "brief": "div.sapo",
-            "author": "#abody p:last",
+            "title": "h1.mainTitle",
+            "datetime": "div.date-line span",
+            "brief": "h2",
+            "author": "#abody p strong:last",
             "content": "#abody",
             "thumbnail": "meta[property='og:image']@content"
         }
