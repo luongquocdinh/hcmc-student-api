@@ -18,6 +18,7 @@ function crawler_detail(url, parse) {
             .set(p)
             .data((res) => {
                 if (!res.title || !res.content) {
+                    console.log(url)
                     reject(null);
                 }
                 resolve(res)
