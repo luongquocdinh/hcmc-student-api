@@ -4,7 +4,7 @@
     "url": "http://thanhnien.vn",
     "crawler": {
         "link": [
-            "a.title@href"
+            "h2 a@href"
         ],
         "detail": {
             "title": "h1.mainTitle",

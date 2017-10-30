@@ -1,11 +1,11 @@
 let osmosis = require('osmosis')
-let url = 'http://tinnong.thanhnien.vn/chuyen-la/tau-ngam-hat-nhan-my-dam-vao-nui-ngam-van-khong-suy-suyen-57779.html'
+let url = 'http://thethao.thanhnien.vn/bong-da-viet-nam/hlv-calisto-se-dan-dat-clb-tphcm-79388.html'
 let p = {
-    "title": "h1.mainTitle",
-    "datetime": "div.date-line span",
-    "brief": "h2",
-    "author": "#abody p strong:last",
-    "content": "#abody",
+    "title": "h1",
+    "datetime": "time",
+    "brief": "div#chapeau",
+    "author": "div#abody p:last strong",
+    "content": "div#abdf",
     "thumbnail": "meta[property='og:image']@content"
 }
     osmosis
