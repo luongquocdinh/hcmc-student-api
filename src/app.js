@@ -17,6 +17,7 @@ let location = require('./../routes/location')
 let comment = require('./../routes/comment')
 let redeem = require('./../routes/redeem')
 let reward = require('./../routes/reward')
+let test = require('./../routes/crawler')
 
 let path = require('path')
 
@@ -63,5 +64,6 @@ app.use('/images', images)
 app.use('/comment', comment)
 app.use('/redeem', redeem)
 app.use('/reward', reward)
+app.use('/crawler', test)
 
 module.exports = app
