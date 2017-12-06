@@ -91,7 +91,7 @@ router.post('/register', (req, res) => {
     Login.findOne({ token: req.headers.token })
         .then(login => {
             if (!login) {
-                return res.json(401).json(responseError("Please Login"));
+                return res.status(401).json(responseError("Please Login"));
             }
 
             return login;

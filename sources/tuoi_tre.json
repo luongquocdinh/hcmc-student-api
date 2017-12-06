@@ -2,6 +2,7 @@
     "name": "Tuổi Trẻ",
     "origin_url": "http://tuoitre.vn", 
     "url": "http://tuoitre.vn",
+    "icon": "tuoi-tre.png",
     "crawler": {
         "link": [
             "h4 a@href",

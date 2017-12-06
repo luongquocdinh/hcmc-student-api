@@ -32,6 +32,10 @@ router.post('/', (req, res) => {
             .then(user => {
                 Reward.findOne({ _id: id })
                     .then(reward => {
+                        if (!reward) {
+                            return res.status(401).json(responseError("Reward not extis"));
+                        }
+
                         if (reward.point > user.point) {
                             return res.status(401).json(responseError("Not enough point"));
                         }
@@ -61,6 +65,7 @@ router.post('/', (req, res) => {
                         return res.json(responseSuccess("System handling", content));
                     })
                     .catch(err => {
+                        console.log(err)
                         return res.status(401).json(responseError("Server Error"));
                     })
             })
