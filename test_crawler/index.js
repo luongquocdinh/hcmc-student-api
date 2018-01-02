@@ -1,6 +1,4 @@
 let path = require('path');
-let sources = path.join(__dirname, './../sources');
-let fs = require('fs');
 let trim = require('trim');
 let url = require('url');
 
@@ -30,6 +28,5 @@ osmosis
     })
     .error(error => {
         console.log(error);
-        // reject(error);
     })
     .debug(console.log)
