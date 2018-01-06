@@ -71,7 +71,7 @@ module.exports ={
                                         content: res.content,
                                         author: res.author,
                                         is_accept: true,
-                                        datetime: chrono.parseDate(res.datetime).getTime() || Date.now()
+                                        datetime: chrono.parseDate(res.datetime).getTime() / 1000 || Date.now()
                                     })
                                     console.log("Done:", p.link);
                                     data.save()

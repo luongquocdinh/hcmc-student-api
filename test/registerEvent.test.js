@@ -16,7 +16,7 @@ var port = require('./../bin/index').port
 const ROOT_PATH = 'http://localhost:' + port
 const USERS_PATH = ROOT_PATH + '/event/register';
 
-let token = 'cd790654254d239f57faa5acf0d18dd962e6bfbab8b05cbda66a8ec111591e4c';
+let token = 'e288fa61f3102f3ab6afa84df06ef326b1ab6f8d32c186a1545bff99e9d5fb1c';
 
 describe ('Test API Register Event', () => {
     it ('Test API Register Event - Missing token', (done) => {
