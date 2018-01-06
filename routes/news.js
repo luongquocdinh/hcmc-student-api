@@ -122,6 +122,7 @@ router.get('/:topic_ascii/:id', function (req, res) {
                         datetime: data.datetime,
                         content: data.content,
                         author: data.author,
+                        article:data.article,
                         views: data.views
                     }
                     View.findOne({
@@ -178,6 +179,7 @@ router.get('/:topic_ascii/:id', function (req, res) {
                         datetime: data.datetime,
                         content: data.content,
                         author: data.author,
+                        article:data.article,
                         views: data.views
                     }
                     return res.json({

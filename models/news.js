@@ -14,6 +14,7 @@ var news = new Schema({
     author: {type: String},
     is_accept: {type: Boolean},
     datetime: {type: Number},
+    article: {type: String, default: "HCMC STUDENT"},
     views: {type: Number, default: 0},
 
     created_at: { type: Date, default: Date.now },
